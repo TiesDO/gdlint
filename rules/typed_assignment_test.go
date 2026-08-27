@@ -54,8 +54,10 @@ func TestRootLevelAssignments(t *testing.T) {
 	fail_on(err)
 
 	expected := []rules.Warning{
-		{LineNumber: 3, Message: "variable c is untyped", Offense: "untyped_var"},
-		{LineNumber: 8, Message: "variable z is untyped", Offense: "untyped_var"},
+		{LineNumber: 3, Message: "variable c is untyped", Offense: "untyped_variable_statement"},
+		{LineNumber: 8, Message: "variable z is untyped", Offense: "untyped_variable_statement"},
+		{LineNumber: 13, Message: "function bazz has no return type", Offense: "untyped_function_return"},
+		{LineNumber: 13, Message: "argument m is untyped", Offense: "untyped_function_argument"},
 	}
 
 	assert.ElementsMatch(t, expected, warnings)

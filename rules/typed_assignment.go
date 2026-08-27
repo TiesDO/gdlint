@@ -1,8 +1,10 @@
 package rules
 
 import (
+	_ "embed"
 	"fmt"
 
+	"github.com/TiesDO/gdlint/queries"
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
@@ -19,15 +21,13 @@ func NewTypedAssignmentRule(language *sitter.Language) TypedAssignmentRule {
 
 func (r *TypedAssignmentRule) Check(tree *sitter.Tree, source []byte) ([]Warning, error) {
 	warnings := make([]Warning, 0, 3)
-	pattern := []byte("(variable_statement !type name: (name) @var_name) @untyped_assignment")
 
-	query, err := sitter.NewQuery(pattern, r.language)
+	query, err := sitter.NewQuery(queries.TypeAssignmentPattern, r.language)
 	if err != nil {
 		return warnings, err
 	}
 
 	cursor := sitter.NewQueryCursor()
-
 	cursor.Exec(query, tree.RootNode())
 
 	for {
@@ -36,22 +36,33 @@ func (r *TypedAssignmentRule) Check(tree *sitter.Tree, source []byte) ([]Warning
 			break
 		}
 
-		warning := Warning{
-			Offense: "untyped_var",
-		}
-
 		for _, capture := range match.Captures {
-			captureName := query.CaptureNameForId(capture.Index)
+			node := capture.Node
+			startLine := int(node.StartPoint().Row) + 1
+			content := string(source[node.StartByte():node.EndByte()])
 
-			if captureName == "var_name" {
-				node := capture.Node
-				varName := string(source[node.StartByte():node.EndByte()])
-				warning.Message = fmt.Sprintf("variable %s is untyped", varName)
-				warning.LineNumber = int(node.StartPoint().Row) + 1
+			captureName := query.CaptureNameForId(capture.Index)
+			switch captureName {
+			case "untyped_variable_statement":
+				warnings = append(warnings, Warning{
+					LineNumber: startLine,
+					Offense:    "untyped_variable_statement",
+					Message:    fmt.Sprintf("variable %s is untyped", content),
+				})
+			case "untyped_function_return":
+				warnings = append(warnings, Warning{
+					LineNumber: startLine,
+					Offense:    "untyped_function_return",
+					Message:    fmt.Sprintf("function %s has no return type", content),
+				})
+			case "untyped_function_argument":
+				warnings = append(warnings, Warning{
+					LineNumber: startLine,
+					Offense:    "untyped_function_argument",
+					Message:    fmt.Sprintf("argument %s is untyped", content),
+				})
 			}
 		}
-
-		warnings = append(warnings, warning)
 	}
 
 	return warnings, nil
