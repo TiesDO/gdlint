@@ -1,6 +1,8 @@
 package rules
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 
@@ -84,11 +86,12 @@ func NewRuleRunner(registry *RuleRegistry, source []byte) RuleRunner {
 
 func (r *RuleRunner) RunRule(name string, ctx context.Context) ([]Warning, error) {
 	tree, err := r.parser.ParseCtx(ctx, r.tree, r.source)
-	r.tree = tree
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse source into tree: %v", err)
 	}
+
+	r.tree = tree
 
 	rule := r.registry.GetByName(name)
 
@@ -126,8 +129,75 @@ func (r *RuleRunner) RunRule(name string, ctx context.Context) ([]Warning, error
 	return out_warnings, nil
 }
 
-// TODO: make this combine the patterns, keep track of match indexes and pass them to the correct rule executor
-// func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, error) {
-// }
+func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, error) {
+	rules := make([]*Rule, 0)
+	for _, name := range names {
+		rule := r.registry.GetByName(name)
+		if rule == nil {
+			return nil, fmt.Errorf("failed to find rule '%s'", name)
+		}
+		rules = append(rules, rule)
+	}
+
+	var pattern_buf bytes.Buffer
+	pattern_writer := bufio.NewWriter(&pattern_buf)
+
+	for _, rule := range rules {
+		_, err := pattern_writer.Write(rule.pattern)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to write pattern to buffer for rule '%s': %v", rule.name, err)
+		}
+
+		_, err = pattern_writer.WriteString("\n\n")
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to write pattern separator to buffer for rule '%s': %v", rule.name, err)
+		}
+	}
+
+	err := pattern_writer.Flush()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to flush aggregate pattern writer: %v", err)
+	}
+
+	tree, err := r.parser.ParseCtx(context.Background(), r.tree, r.source)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse source into tree: %v", err)
+	}
+
+	r.tree = tree
+
+	query, err := sitter.NewQuery(pattern_buf.Bytes(), r.language)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create query: %v", err)
+	}
+
+	cursor := sitter.NewQueryCursor()
+	cursor.Exec(query, r.tree.RootNode())
+
+	out_warnings := make([]Warning, 0)
+
+	for {
+		match, ok := cursor.NextMatch()
+		if !ok {
+			break
+		}
+
+		rule := rules[match.PatternIndex]
+		warnings, err := rule.execute(match, r.source)
+
+		if err != nil {
+			return nil, err
+		}
+
+		out_warnings = append(out_warnings, warnings...)
+	}
+
+	return out_warnings, nil
+}
 
 var DefaultRuleRegistry = NewRuleRegistry()

@@ -34,9 +34,8 @@ var checkCmd = &cobra.Command{
 
 		runner := rules.NewRuleRunner(&rules.DefaultRuleRegistry, content)
 
-		// TODO: make this use RunRules with all rules
 		// TODO: add arguments to pass rules you want
-		warnings, err := runner.RunRule("untyped_function_argument", context.Background())
+		warnings, err := runner.RunRules([]string{"untyped_function_argument", "untyped_variable_statement", "untyped_function_return"}, context.Background())
 
 		if err != nil {
 			fmt.Printf("error while executing rules: %v", err)

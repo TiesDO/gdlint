@@ -31,5 +31,5 @@ var untypedFunctionReturnRule = Rule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterRule(&untypedFunctionArgumentRule)
+	DefaultRuleRegistry.RegisterRule(&untypedFunctionReturnRule)
 }
