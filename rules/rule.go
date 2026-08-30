@@ -20,6 +20,10 @@ type Warning struct {
 	Offense string
 }
 
+func (w *Warning) FullMessage() string {
+	return fmt.Sprintf("%d:%d (@%s) - %s", w.StartLine+1, w.StartChar+1, w.Offense, w.Message)
+}
+
 type RuleOld interface {
 	Check(*sitter.Tree, []byte) ([]Warning, error)
 }

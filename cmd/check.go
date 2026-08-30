@@ -81,7 +81,7 @@ var checkCmd = &cobra.Command{
 
 		fmt.Printf("found %d warnings\n", len(warnings))
 		for _, warning := range warnings {
-			fmt.Printf("%d:%d (@%s) - %s\n", warning.StartLine+1, warning.StartChar+1, warning.Offense, warning.Message)
+			fmt.Printf("%s\n", warning.FullMessage())
 		}
 	},
 }
