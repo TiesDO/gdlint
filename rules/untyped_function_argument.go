@@ -6,7 +6,7 @@ import (
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
-var untypedFunctionArgumentRule = Rule{
+var UntypedFunctionArgumentRule = Rule{
 	name:    "untyped_function_argument",
 	pattern: []byte("(function_definition parameters: (parameters (identifier) @untyped_function_argument))"),
 	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
@@ -31,5 +31,5 @@ var untypedFunctionArgumentRule = Rule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterRule(&untypedFunctionArgumentRule)
+	DefaultRuleRegistry.RegisterRule(&UntypedFunctionArgumentRule)
 }
