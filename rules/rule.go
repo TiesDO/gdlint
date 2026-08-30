@@ -26,6 +26,10 @@ type Rule struct {
 	pattern []byte
 }
 
+func (r *Rule) Name() string {
+	return r.name
+}
+
 func (r *Rule) Execute(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 	return r.execute(match, source)
 }
