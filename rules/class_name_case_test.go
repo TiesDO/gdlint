@@ -22,9 +22,28 @@ func TestClassNameCase(t *testing.T) {
 	}
 
 	expected := []rules.Warning{
-		{LineNumber: 1, Message: "class name 'foo' must be PascalCase", Offense: "class_name_case"},
-		{LineNumber: 3, Message: "class name 'bar' must be PascalCase", Offense: "class_name_case"},
-		{LineNumber: 9, Message: "class name 'BAR_TEST' must be PascalCase", Offense: "class_name_case"},
+		{
+			StartLine: 0,
+			StartChar: 11,
+			EndLine:   0,
+			EndChar:   14,
+			Message:   "class name 'foo' must be PascalCase",
+			Offense:   "class_name_case",
+		}, {
+			StartLine: 2,
+			StartChar: 6,
+			EndLine:   2,
+			EndChar:   9,
+			Message:   "class name 'bar' must be PascalCase",
+			Offense:   "class_name_case",
+		}, {
+			StartLine: 8,
+			StartChar: 6,
+			EndLine:   8,
+			EndChar:   14,
+			Message:   "class name 'BAR_TEST' must be PascalCase",
+			Offense:   "class_name_case",
+		},
 	}
 
 	assert.ElementsMatch(t, expected, warnings)

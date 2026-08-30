@@ -11,9 +11,13 @@ import (
 )
 
 type Warning struct {
-	LineNumber int
-	Message    string
-	Offense    string
+	StartLine int
+	StartChar int
+	EndLine   int
+	EndChar   int
+
+	Message string
+	Offense string
 }
 
 type RuleOld interface {

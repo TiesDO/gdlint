@@ -17,12 +17,18 @@ var ClassNameCaseRule = Rule{
 
 		capture := match.Captures[0]
 		node := capture.Node
-		startLine := int(node.StartPoint().Row) + 1
 		content := string(source[node.StartByte():node.EndByte()])
 
 		if !util.IsPascalCase(content) {
 			return []Warning{
-				{LineNumber: startLine, Message: fmt.Sprintf("class name '%s' must be PascalCase", content), Offense: "class_name_case"},
+				{
+					StartLine: int(node.StartPoint().Row),
+					StartChar: int(node.StartPoint().Column),
+					EndLine:   int(node.EndPoint().Row),
+					EndChar:   int(node.EndPoint().Column),
+					Message:   fmt.Sprintf("class name '%s' must be PascalCase", content),
+					Offense:   "class_name_case",
+				},
 			}, nil
 		} else {
 			return nil, nil

@@ -16,14 +16,16 @@ var UntypedVariableStatementRule = Rule{
 
 		capture := match.Captures[0]
 		node := capture.Node
-		startLine := int(node.StartPoint().Row) + 1
 		content := string(source[node.StartByte():node.EndByte()])
 
 		warnings := make([]Warning, 1)
 		warnings[0] = Warning{
-			LineNumber: startLine,
-			Offense:    "untyped_variable_statement",
-			Message:    fmt.Sprintf("variable %s is untyped", content),
+			StartLine: int(node.StartPoint().Row),
+			StartChar: int(node.StartPoint().Column),
+			EndLine:   int(node.EndPoint().Row),
+			EndChar:   int(node.EndPoint().Column),
+			Offense:   "untyped_variable_statement",
+			Message:   fmt.Sprintf("variable %s is untyped", content),
 		}
 
 		return warnings, nil

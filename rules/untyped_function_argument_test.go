@@ -22,7 +22,13 @@ func TestUntypedFunctionArgument(t *testing.T) {
 	}
 
 	expected := []rules.Warning{
-		{LineNumber: 13, Message: "untyped argument m", Offense: "untyped_function_argument"},
+		{
+			StartLine: 12,
+			StartChar: 10,
+			EndLine:   12,
+			EndChar:   11,
+			Message:   "untyped argument m",
+			Offense:   "untyped_function_argument"},
 	}
 
 	assert.ElementsMatch(t, expected, warnings)

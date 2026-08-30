@@ -22,7 +22,14 @@ func TestUntypedFunctionReturn(t *testing.T) {
 	}
 
 	expected := []rules.Warning{
-		{LineNumber: 13, Message: "function bazz has no return type", Offense: "untyped_function_return"},
+		{
+			StartLine: 12,
+			StartChar: 5,
+			EndLine:   12,
+			EndChar:   9,
+			Message:   "function bazz has no return type",
+			Offense:   "untyped_function_return",
+		},
 	}
 
 	assert.ElementsMatch(t, expected, warnings)
