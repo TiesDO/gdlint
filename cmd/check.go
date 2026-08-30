@@ -21,7 +21,7 @@ var checkCmd = &cobra.Command{
 		path, err := filepath.Abs(pathStr)
 
 		if err != nil {
-			fmt.Printf("failed to expand provided filepath: %v", err)
+			fmt.Printf("failed to expand provided filepath: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -34,11 +34,43 @@ var checkCmd = &cobra.Command{
 
 		runner := rules.NewRuleRunner(&rules.DefaultRuleRegistry, content)
 
-		// TODO: add arguments to pass rules you want
-		warnings, err := runner.RunRules([]string{"untyped_function_argument", "untyped_variable_statement", "untyped_function_return"}, context.Background())
+		included_rules, err := cmd.Flags().GetStringSlice("include")
 
 		if err != nil {
-			fmt.Printf("error while executing rules: %v", err)
+			fmt.Printf("failed to extract included rules: %v\n", err)
+			os.Exit(1)
+		}
+
+		if len(included_rules) == 0 {
+			included_rules = rules.DefaultRuleRegistry.RuleNames()
+		}
+
+		excluded_rules, err := cmd.Flags().GetStringSlice("exclude")
+
+		if err != nil {
+			fmt.Printf("failed to extract excluded rules: %v\n", err)
+			os.Exit(1)
+		}
+
+		target_rules := make([]string, 0)
+
+		if len(excluded_rules) > 0 {
+			for _, included_rule := range included_rules {
+				for _, excluded_rule := range excluded_rules {
+					if included_rule == excluded_rule {
+						break
+					}
+					target_rules = append(target_rules, included_rule)
+				}
+			}
+		} else {
+			target_rules = included_rules
+		}
+
+		warnings, err := runner.RunRules(target_rules, context.Background())
+
+		if err != nil {
+			fmt.Printf("error while executing rules: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -55,5 +87,7 @@ var checkCmd = &cobra.Command{
 }
 
 func init() {
+	checkCmd.Flags().StringSliceP("include", "i", []string{}, "rules to include")
+	checkCmd.Flags().StringSliceP("exclude", "e", []string{}, "rules to exclude (on conflict overrides include)")
 	rootCmd.AddCommand(checkCmd)
 }

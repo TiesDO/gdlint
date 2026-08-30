@@ -65,6 +65,16 @@ func (r *RuleRegistry) GetByName(name string) *Rule {
 	}
 }
 
+func (r *RuleRegistry) RuleNames() []string {
+	names := make([]string, 0)
+
+	for _, rule := range r.rules {
+		names = append(names, rule.name)
+	}
+
+	return names
+}
+
 type RuleRunner struct {
 	registry *RuleRegistry
 	source   []byte
