@@ -24,44 +24,44 @@ func (w *Warning) FullMessage() string {
 	return fmt.Sprintf("%d:%d (@%s) - %s", w.StartLine+1, w.StartChar+1, w.Offense, w.Message)
 }
 
-type Rule struct {
+type MatchRule struct {
 	name    string
 	execute func(*sitter.QueryMatch, []byte) ([]Warning, error)
 	pattern []byte
 }
 
-func (r *Rule) Name() string {
+func (r *MatchRule) Name() string {
 	return r.name
 }
 
-func (r *Rule) Execute(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+func (r *MatchRule) Execute(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 	return r.execute(match, source)
 }
 
 type RuleRegistry struct {
-	rules map[string]*Rule
+	match_rules map[string]*MatchRule
 }
 
 func NewRuleRegistry() RuleRegistry {
 	registry := RuleRegistry{
-		rules: make(map[string]*Rule),
+		match_rules: make(map[string]*MatchRule),
 	}
 	return registry
 }
 
-func (r *RuleRegistry) RegisterRule(rule *Rule) error {
-	_, exists := r.rules[rule.name]
+func (r *RuleRegistry) RegisterMatchRule(rule *MatchRule) error {
+	_, exists := r.match_rules[rule.name]
 
 	if exists {
 		return fmt.Errorf("already registered a rule with name '%s'", rule.name)
 	}
 
-	r.rules[rule.name] = rule
+	r.match_rules[rule.name] = rule
 	return nil
 }
 
-func (r *RuleRegistry) GetByName(name string) *Rule {
-	rule, ok := r.rules[name]
+func (r *RuleRegistry) GetByName(name string) *MatchRule {
+	rule, ok := r.match_rules[name]
 	if ok {
 		return rule
 	} else {
@@ -72,7 +72,7 @@ func (r *RuleRegistry) GetByName(name string) *Rule {
 func (r *RuleRegistry) RuleNames() []string {
 	names := make([]string, 0)
 
-	for _, rule := range r.rules {
+	for _, rule := range r.match_rules {
 		names = append(names, rule.name)
 	}
 
@@ -103,7 +103,7 @@ func NewRuleRunner(registry *RuleRegistry, source []byte) RuleRunner {
 }
 
 func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, error) {
-	rules := make([]*Rule, 0)
+	rules := make([]*MatchRule, 0)
 	for _, name := range names {
 		rule := r.registry.GetByName(name)
 		if rule == nil {

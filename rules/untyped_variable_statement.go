@@ -6,7 +6,7 @@ import (
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
-var UntypedVariableStatementRule = Rule{
+var UntypedVariableStatementRule = MatchRule{
 	name:    "untyped_variable_statement",
 	pattern: []byte("(variable_statement !type name: (name) @untyped_var)"),
 	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
@@ -33,5 +33,5 @@ var UntypedVariableStatementRule = Rule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterRule(&UntypedVariableStatementRule)
+	DefaultRuleRegistry.RegisterMatchRule(&UntypedVariableStatementRule)
 }

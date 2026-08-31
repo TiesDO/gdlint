@@ -7,7 +7,7 @@ import (
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
-var ClassNameCaseRule = Rule{
+var ClassNameCaseRule = MatchRule{
 	name:    "class_name_case",
 	pattern: []byte("[(class_name_statement name: (name) @class_name) (class_definition name: (name) @class_definition)]"),
 	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
@@ -37,5 +37,5 @@ var ClassNameCaseRule = Rule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterRule(&ClassNameCaseRule)
+	DefaultRuleRegistry.RegisterMatchRule(&ClassNameCaseRule)
 }
