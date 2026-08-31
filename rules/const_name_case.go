@@ -7,7 +7,7 @@ import (
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
-var ConstNameCaseRule = Rule{
+var ConstNameCaseRule = MatchRule{
 	name:    "const_name_case",
 	pattern: []byte("(const_statement name: (name) @const_name)"),
 	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
@@ -37,5 +37,5 @@ var ConstNameCaseRule = Rule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterRule(&ConstNameCaseRule)
+	DefaultRuleRegistry.RegisterMatchRule(&ConstNameCaseRule)
 }
