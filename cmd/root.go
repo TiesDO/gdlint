@@ -11,7 +11,7 @@ var rootCmd = &cobra.Command{
 	Use:   "",
 	Short: "",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("root cmd executed")
+		cmd.Help()
 	},
 }
 
