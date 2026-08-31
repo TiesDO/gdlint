@@ -266,7 +266,19 @@ func (r *RuleRunner) runMatchRules(rules []*MatchRule) ([]Warning, error) {
 }
 
 func (r *RuleRunner) runNodeRules(rules []*NodeRule) ([]Warning, error) {
-	return nil, nil
+	out_warnings := make([]Warning, 0)
+
+	for _, rule := range rules {
+		warnings, err := rule.Execute(r.tree.RootNode(), r.source)
+
+		if err != nil {
+			return nil, err
+		}
+
+		out_warnings = append(out_warnings, warnings...)
+	}
+
+	return out_warnings, nil
 }
 
 var DefaultRuleRegistry = NewRuleRegistry()
