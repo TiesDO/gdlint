@@ -213,6 +213,40 @@ func (r *RuleRunner) UpdateTree(ctx context.Context) error {
 	return nil
 }
 
+func (r *RuleRunner) ExecutePattern(pattern string) (string, error) {
+	var builder strings.Builder
+	query, qerr := sitter.NewQuery(r.language, pattern)
+
+	if qerr != nil {
+		return "", fmt.Errorf("failed to create query: %v", qerr.Message)
+	}
+
+	cursor := sitter.NewQueryCursor()
+	matches := cursor.Matches(query, r.tree.RootNode(), r.source)
+
+	for {
+		match := matches.Next()
+
+		if match == nil {
+			break
+		}
+
+		fmt.Fprintf(&builder, "match: %d\n", match.Id())
+		for _, capture := range match.Captures {
+			fmt.Fprintf(&builder, "\tcapture: %s (%d)\n", capture.Node.GrammarName(), capture.Index)
+			fmt.Fprintf(&builder, "\tcontent: %s\n", r.source[capture.Node.StartByte():capture.Node.EndByte()])
+		}
+	}
+
+	output := builder.String()
+
+	if len(output) == 0 {
+		return "no matches found", nil
+	}
+
+	return output, nil
+}
+
 func (r *RuleRunner) SprintTree() string {
 	treeCursor := r.tree.Walk()
 	var builder strings.Builder
