@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	gdscript "github.com/prestonknopp/tree-sitter-gdscript/bindings/go"
 	sitter "github.com/tree-sitter/go-tree-sitter"
@@ -153,7 +154,7 @@ func NewRuleRunner(registry *RuleRegistry, source []byte) RuleRunner {
 }
 
 func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, error) {
-	err := r.updateTree(ctx)
+	err := r.UpdateTree(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse source into tree: %v", err)
@@ -201,7 +202,7 @@ func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, e
 	return out_warnings, nil
 }
 
-func (r *RuleRunner) updateTree(ctx context.Context) error {
+func (r *RuleRunner) UpdateTree(ctx context.Context) error {
 	tree := r.parser.ParseCtx(ctx, r.source, r.tree)
 
 	if tree == nil {
@@ -210,6 +211,43 @@ func (r *RuleRunner) updateTree(ctx context.Context) error {
 
 	r.tree = tree
 	return nil
+}
+
+func (r *RuleRunner) SprintTree() string {
+	treeCursor := r.tree.Walk()
+	var builder strings.Builder
+	r.fprintTreeNode(treeCursor, 0, &builder)
+
+	return builder.String()
+}
+
+func (r *RuleRunner) fprintTreeNode(cursor *sitter.TreeCursor, depth int, builder *strings.Builder) {
+	indent := strings.Repeat("  ", depth)
+	node := cursor.Node()
+
+	prefix := ""
+	if fieldName := cursor.FieldName(); fieldName != "" {
+		prefix = fieldName + ": "
+	}
+
+	start := node.StartPosition()
+	end := node.EndPosition()
+
+	fmt.Fprintf(builder,
+		"%s%s%s [%d, %d] - [%d, %d]\n",
+		indent,
+		prefix,
+		node.GrammarName(),
+		start.Row, start.Column,
+		end.Row, end.Column)
+
+	if cursor.GotoFirstChild() {
+		r.fprintTreeNode(cursor, depth+1, builder)
+		for cursor.GotoNextSibling() {
+			r.fprintTreeNode(cursor, depth+1, builder)
+		}
+		cursor.GotoParent()
+	}
 }
 
 func (r *RuleRunner) runMatchRules(rules []*MatchRule) ([]Warning, error) {
