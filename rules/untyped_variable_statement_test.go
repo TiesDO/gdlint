@@ -15,7 +15,7 @@ func TestUntypedVariableStatements(t *testing.T) {
 		t.Error(err)
 	}
 
-	warnings, err := runner.RunRule(rules.UntypedVariableStatementRule.Name(), context.Background())
+	warnings, err := runner.RunRules([]string{rules.UntypedVariableStatementRule.Name()}, context.Background())
 
 	if err != nil {
 		t.Error(err)

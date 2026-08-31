@@ -24,10 +24,6 @@ func (w *Warning) FullMessage() string {
 	return fmt.Sprintf("%d:%d (@%s) - %s", w.StartLine+1, w.StartChar+1, w.Offense, w.Message)
 }
 
-type RuleOld interface {
-	Check(*sitter.Tree, []byte) ([]Warning, error)
-}
-
 type Rule struct {
 	name    string
 	execute func(*sitter.QueryMatch, []byte) ([]Warning, error)
@@ -104,51 +100,6 @@ func NewRuleRunner(registry *RuleRegistry, source []byte) RuleRunner {
 	runner.parser.SetLanguage(runner.language)
 
 	return runner
-}
-
-func (r *RuleRunner) RunRule(name string, ctx context.Context) ([]Warning, error) {
-	tree, err := r.parser.ParseCtx(ctx, r.tree, r.source)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse source into tree: %v", err)
-	}
-
-	r.tree = tree
-
-	rule := r.registry.GetByName(name)
-
-	if rule == nil {
-		return nil, fmt.Errorf("failed to find rule '%s' in registry", name)
-	}
-
-	query, err := sitter.NewQuery(rule.pattern, r.language)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate query: %v", err)
-	}
-
-	cursor := sitter.NewQueryCursor()
-	cursor.Exec(query, r.tree.RootNode())
-
-	out_warnings := make([]Warning, 0)
-
-	for {
-		match, ok := cursor.NextMatch()
-
-		if !ok {
-			break
-		}
-
-		warnings, err := rule.Execute(match, r.source)
-
-		if err != nil {
-			return nil, fmt.Errorf("failed to execute rule on match: %v", err)
-		}
-
-		out_warnings = append(out_warnings, warnings...)
-	}
-
-	return out_warnings, nil
 }
 
 func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, error) {

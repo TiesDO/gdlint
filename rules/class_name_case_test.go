@@ -15,7 +15,7 @@ func TestClassNameCase(t *testing.T) {
 		t.Error(err)
 	}
 
-	warnings, err := runner.RunRule("class_name_case", context.Background())
+	warnings, err := runner.RunRules([]string{rules.ClassNameCaseRule.Name()}, context.Background())
 
 	if err != nil {
 		t.Error(err)

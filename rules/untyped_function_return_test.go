@@ -15,7 +15,7 @@ func TestUntypedFunctionReturn(t *testing.T) {
 		t.Error(err)
 	}
 
-	warnings, err := runner.RunRule("untyped_function_return", context.Background())
+	warnings, err := runner.RunRules([]string{rules.UntypedFunctionReturnRule.Name()}, context.Background())
 
 	if err != nil {
 		t.Error(err)
