@@ -4,9 +4,9 @@ go 1.26.2
 
 require (
 	github.com/prestonknopp/tree-sitter-gdscript v1.9.1-0.20251212183927-89e66b6bdc00
-	github.com/smacker/go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
+	github.com/tree-sitter/go-tree-sitter v0.24.0
 	go.lsp.dev/jsonrpc2 v1.0.1
 	go.lsp.dev/protocol v1.0.1
 	go.lsp.dev/uri v1.0.1

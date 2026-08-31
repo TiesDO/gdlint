@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	gdscript "github.com/prestonknopp/tree-sitter-gdscript/bindings/go"
-	sitter "github.com/smacker/go-tree-sitter"
+	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
 type Warning struct {
@@ -201,10 +202,10 @@ func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, e
 }
 
 func (r *RuleRunner) updateTree(ctx context.Context) error {
-	tree, err := r.parser.ParseCtx(ctx, r.tree, r.source)
+	tree := r.parser.ParseCtx(ctx, r.source, r.tree)
 
-	if err != nil {
-		return err
+	if tree == nil {
+		return errors.New("failed to parse tree")
 	}
 
 	r.tree = tree
@@ -235,20 +236,21 @@ func (r *RuleRunner) runMatchRules(rules []*MatchRule) ([]Warning, error) {
 		return nil, fmt.Errorf("failed to flush aggregate pattern writer: %v", err)
 	}
 
-	query, err := sitter.NewQuery(pattern_buf.Bytes(), r.language)
+	query, qerr := sitter.NewQuery(r.language, pattern_buf.String())
 
-	if err != nil {
+	if qerr != nil {
 		return nil, fmt.Errorf("failed to create query: %v", err)
 	}
 
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(query, r.tree.RootNode())
 
 	out_warnings := make([]Warning, 0)
 
+	matches := cursor.Matches(query, r.tree.RootNode(), r.source)
+
 	for {
-		match, ok := cursor.NextMatch()
-		if !ok {
+		match := matches.Next()
+		if match == nil {
 			break
 		}
 

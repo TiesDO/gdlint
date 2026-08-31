@@ -3,7 +3,7 @@ package rules
 import (
 	"fmt"
 
-	sitter "github.com/smacker/go-tree-sitter"
+	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
 var phaseOrderMap map[string]int = map[string]int{
@@ -27,8 +27,8 @@ var CodeOrderRule = NodeRule{
 		warnings := make([]Warning, 0)
 
 		for i := range node.ChildCount() {
-			child := node.Child(int(i))
-			nodeType := child.Type()
+			child := node.Child(uint(i))
+			nodeType := child.GrammarName()
 
 			phase, ok := phaseOrderMap[nodeType]
 
@@ -50,10 +50,10 @@ var CodeOrderRule = NodeRule{
 				}
 
 				warnings = append(warnings, Warning{
-					StartLine: int(child.StartPoint().Row),
-					StartChar: int(child.StartPoint().Column),
-					EndLine:   int(child.EndPoint().Row),
-					EndChar:   int(child.EndPoint().Column),
+					StartLine: int(child.StartPosition().Row),
+					StartChar: int(child.StartPosition().Column),
+					EndLine:   int(child.EndPosition().Row),
+					EndChar:   int(child.EndPosition().Column),
 					Message:   fmt.Sprintf("%s should be defined before %s", nodePlural, prevPlural),
 					Offense:   "code_order",
 				})
