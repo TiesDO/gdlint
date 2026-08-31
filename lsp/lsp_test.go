@@ -5,18 +5,6 @@ import (
 	"time"
 )
 
-// func TestMethodInitialize(t *testing.T) {
-// 	client := NewTestClient(t)
-// 	defer client.Close()
-
-// 	res := client.Initialize()
-
-// 	syncOpts, ok := res.Capabilities.TextDocumentSync.(*protocol.TextDocumentSyncOptions)
-// 	if !ok || *syncOpts.Change != protocol.TextDocumentSyncKindFull {
-// 		t.Errorf("Expected SyncKindFull capabilities")
-// 	}
-// }
-
 func TestDiagnosticsOnDidOpen(t *testing.T) {
 	client := NewTestClient(t)
 	defer client.Close()
