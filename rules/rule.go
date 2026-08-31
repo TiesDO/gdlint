@@ -24,6 +24,10 @@ func (w *Warning) FullMessage() string {
 	return fmt.Sprintf("%d:%d (@%s) - %s", w.StartLine+1, w.StartChar+1, w.Offense, w.Message)
 }
 
+type Rule interface {
+	Name() string
+}
+
 type MatchRule struct {
 	name    string
 	execute func(*sitter.QueryMatch, []byte) ([]Warning, error)
@@ -38,19 +42,46 @@ func (r *MatchRule) Execute(match *sitter.QueryMatch, source []byte) ([]Warning,
 	return r.execute(match, source)
 }
 
+type NodeRule struct {
+	name    string
+	execute func(*sitter.Node, []byte) ([]Warning, error)
+}
+
+func (r *NodeRule) Name() string {
+	return r.name
+}
+
+func (r *NodeRule) Execute(node *sitter.Node, source []byte) ([]Warning, error) {
+	return r.execute(node, source)
+}
+
 type RuleRegistry struct {
 	match_rules map[string]*MatchRule
+	node_rules  map[string]*NodeRule
 }
 
 func NewRuleRegistry() RuleRegistry {
 	registry := RuleRegistry{
 		match_rules: make(map[string]*MatchRule),
+		node_rules:  make(map[string]*NodeRule),
 	}
 	return registry
 }
 
+func (r *RuleRegistry) RuleExists(name string) bool {
+	if _, exists := r.match_rules[name]; exists {
+		return true
+	}
+
+	if _, exists := r.node_rules[name]; exists {
+		return true
+	}
+
+	return false
+}
+
 func (r *RuleRegistry) RegisterMatchRule(rule *MatchRule) error {
-	_, exists := r.match_rules[rule.name]
+	exists := r.RuleExists(rule.name)
 
 	if exists {
 		return fmt.Errorf("already registered a rule with name '%s'", rule.name)
@@ -60,19 +91,37 @@ func (r *RuleRegistry) RegisterMatchRule(rule *MatchRule) error {
 	return nil
 }
 
-func (r *RuleRegistry) GetByName(name string) *MatchRule {
-	rule, ok := r.match_rules[name]
-	if ok {
-		return rule
-	} else {
-		return nil
+func (r *RuleRegistry) RegisterNodeRule(rule *NodeRule) error {
+	exists := r.RuleExists(rule.name)
+
+	if exists {
+		return fmt.Errorf("already registered a rule with name '%s'", rule.name)
 	}
+
+	r.node_rules[rule.name] = rule
+	return nil
+}
+
+func (r *RuleRegistry) GetByName(name string) Rule {
+	if rule, ok := r.match_rules[name]; ok {
+		return rule
+	}
+
+	if rule, ok := r.node_rules[name]; ok {
+		return rule
+	}
+
+	return nil
 }
 
 func (r *RuleRegistry) RuleNames() []string {
 	names := make([]string, 0)
 
 	for _, rule := range r.match_rules {
+		names = append(names, rule.name)
+	}
+
+	for _, rule := range r.node_rules {
 		names = append(names, rule.name)
 	}
 
@@ -103,15 +152,66 @@ func NewRuleRunner(registry *RuleRegistry, source []byte) RuleRunner {
 }
 
 func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, error) {
-	rules := make([]*MatchRule, 0)
+	err := r.updateTree(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse source into tree: %v", err)
+	}
+
+	match_rules := make([]*MatchRule, 0)
+	node_rules := make([]*NodeRule, 0)
 	for _, name := range names {
 		rule := r.registry.GetByName(name)
 		if rule == nil {
 			return nil, fmt.Errorf("failed to find rule '%s'", name)
 		}
-		rules = append(rules, rule)
+
+		if match_rule, ok := rule.(*MatchRule); ok {
+			match_rules = append(match_rules, match_rule)
+		}
+
+		if node_rule, ok := rule.(*NodeRule); ok {
+			node_rules = append(node_rules, node_rule)
+		}
 	}
 
+	out_warnings := make([]Warning, 0)
+
+	match_warnings, err := r.runMatchRules(match_rules)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to run match_rules: %v", err)
+	}
+
+	if len(match_warnings) > 0 {
+		out_warnings = append(out_warnings, match_warnings...)
+	}
+
+	node_warnings, err := r.runNodeRules(node_rules)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to run node_rules: %v", err)
+	}
+
+	if len(node_warnings) > 0 {
+		out_warnings = append(out_warnings, node_warnings...)
+	}
+
+	return out_warnings, nil
+}
+
+func (r *RuleRunner) updateTree(ctx context.Context) error {
+	tree, err := r.parser.ParseCtx(ctx, r.tree, r.source)
+
+	if err != nil {
+		return err
+	}
+
+	r.tree = tree
+	return nil
+}
+
+func (r *RuleRunner) runMatchRules(rules []*MatchRule) ([]Warning, error) {
 	var pattern_buf bytes.Buffer
 	pattern_writer := bufio.NewWriter(&pattern_buf)
 
@@ -134,14 +234,6 @@ func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to flush aggregate pattern writer: %v", err)
 	}
-
-	tree, err := r.parser.ParseCtx(context.Background(), r.tree, r.source)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse source into tree: %v", err)
-	}
-
-	r.tree = tree
 
 	query, err := sitter.NewQuery(pattern_buf.Bytes(), r.language)
 
@@ -171,6 +263,10 @@ func (r *RuleRunner) RunRules(names []string, ctx context.Context) ([]Warning, e
 	}
 
 	return out_warnings, nil
+}
+
+func (r *RuleRunner) runNodeRules(rules []*NodeRule) ([]Warning, error) {
+	return nil, nil
 }
 
 var DefaultRuleRegistry = NewRuleRegistry()
