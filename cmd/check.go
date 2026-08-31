@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"slices"
 
 	"path/filepath"
 
@@ -56,10 +57,9 @@ var checkCmd = &cobra.Command{
 
 		if len(excluded_rules) > 0 {
 			for _, included_rule := range included_rules {
-				for _, excluded_rule := range excluded_rules {
-					if included_rule == excluded_rule {
-						break
-					}
+				is_included := !slices.Contains(excluded_rules, included_rule)
+
+				if is_included {
 					target_rules = append(target_rules, included_rule)
 				}
 			}
