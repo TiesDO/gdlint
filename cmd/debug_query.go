@@ -38,10 +38,15 @@ var debugQueryCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		runner := rules.NewRuleRunner(&rules.DefaultRuleRegistry, content)
+		parser := rules.NewParser()
+		err = parser.Parse(context.Background(), content)
 
-		runner.UpdateTree(context.Background())
-		output, err := runner.ExecutePattern(pattern)
+		if err != nil {
+			fmt.Printf("failed to parse source into tree: %v", err)
+			os.Exit(1)
+		}
+
+		output, err := parser.SQuery(pattern, content)
 
 		if err != nil {
 			fmt.Printf("failed to run query: %v", err)

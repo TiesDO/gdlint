@@ -10,6 +10,7 @@ import (
 
 	"github.com/TiesDO/gdlint/rules"
 	"github.com/spf13/cobra"
+	"go.lsp.dev/uri"
 )
 
 var checkCmd = &cobra.Command{
@@ -33,7 +34,16 @@ var checkCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		runner := rules.NewRuleRunner(&rules.DefaultRuleRegistry, content)
+		document := rules.NewDocument(uri.URI(path))
+
+		err = document.UpdateSource(context.Background(), content)
+
+		if err != nil {
+			fmt.Printf("failed to update document source: %v\n", err)
+			os.Exit(1)
+		}
+
+		runner := rules.NewDocumentRunner(&rules.DefaultRuleRegistry)
 
 		included_rules, err := cmd.Flags().GetStringSlice("include")
 
@@ -67,7 +77,7 @@ var checkCmd = &cobra.Command{
 			target_rules = included_rules
 		}
 
-		warnings, err := runner.RunRules(target_rules, context.Background())
+		warnings, err := runner.CheckDocument(document)
 
 		if err != nil {
 			fmt.Printf("error while executing rules: %v\n", err)
