@@ -3,6 +3,7 @@ package lsp
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"github.com/TiesDO/gdlint/rules"
 	jrpc "go.lsp.dev/jsonrpc2"
 	"go.lsp.dev/protocol"
+	"go.lsp.dev/uri"
 )
 
 const LSP_SOURCE string = "gdlint"
@@ -21,9 +23,11 @@ type stdio struct {
 }
 
 type Server struct {
-	stream jrpc.Stream
-	conn   jrpc.Conn
-	logger *log.Logger
+	stream    jrpc.Stream
+	conn      jrpc.Conn
+	logger    *log.Logger
+	documents map[uri.URI]*rules.Document
+	runner    *rules.DocumentRunner
 }
 
 func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Server {
@@ -32,7 +36,9 @@ func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Serv
 	}
 
 	server := Server{
-		logger: logger,
+		logger:    logger,
+		documents: map[uri.URI]*rules.Document{},
+		runner:    rules.NewDocumentRunner(&rules.DefaultRuleRegistry),
 	}
 
 	server.stream = jrpc.NewStream(stdio{
@@ -46,10 +52,18 @@ func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Serv
 	return server
 }
 
-func (s *Server) Run(ctx context.Context) {
+func (s *Server) Run(ctx context.Context) error {
+	// TODO: read requested ruleset from a config
+	err := s.runner.SetRules(rules.DefaultRuleRegistry.RuleNames())
+
+	if err != nil {
+		return fmt.Errorf("failed to start server: %w", err)
+	}
+
 	s.logger.Println("starting listener")
 	s.conn.Go(ctx, s.handler)
 	<-s.conn.Done()
+	return nil
 }
 
 func (s *Server) handler(ctx context.Context, req *jrpc.Request) (response any, err error) {
@@ -96,14 +110,14 @@ func (s *Server) methodTextDocumentDidOpen(ctx context.Context, req *jrpc.Reques
 	}
 
 	source := []byte(params.TextDocument.Text)
+	uri := params.TextDocument.URI
 
-	diagnostics, err := s.runDiagnostics(ctx, source)
+	document, err := s.ensureDocumentExists(uri, source)
+	diagnostics, err := s.runDiagnostics(document)
 
 	if err != nil {
 		return nil, err
 	}
-
-	uri := params.TextDocument.URI
 
 	s.logger.Printf("notifying client of %d diagnostics\n", len(diagnostics))
 
@@ -134,14 +148,14 @@ func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Requ
 	}
 
 	source := []byte(full_change_event.Text)
+	uri := params.TextDocument.URI
 
-	diagnostics, err := s.runDiagnostics(ctx, source)
+	document, err := s.ensureDocumentExists(uri, source)
+	diagnostics, err := s.runDiagnostics(document)
 
 	if err != nil {
 		return nil, err
 	}
-
-	uri := params.TextDocument.URI
 
 	s.logger.Printf("notifying client of %d diagnostics\n", len(diagnostics))
 
@@ -153,9 +167,8 @@ func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Requ
 	return nil, err
 }
 
-func (s *Server) runDiagnostics(ctx context.Context, source []byte) ([]protocol.Diagnostic, error) {
-	runner := rules.NewRuleRunner(&rules.DefaultRuleRegistry, source)
-	warnings, err := runner.RunRules(rules.DefaultRuleRegistry.RuleNames(), ctx)
+func (s *Server) runDiagnostics(document *rules.Document) ([]protocol.Diagnostic, error) {
+	warnings, err := s.runner.CheckDocument(document)
 
 	if err != nil {
 		return nil, err
@@ -187,4 +200,28 @@ func (s *Server) runDiagnostics(ctx context.Context, source []byte) ([]protocol.
 	}
 
 	return diagnostics, nil
+}
+
+func (s *Server) ensureDocumentExists(documentUri uri.URI, source []byte) (*rules.Document, error) {
+	document, ok := s.documents[documentUri]
+
+	if !ok {
+		s.logger.Printf("recieved new document %s", documentUri)
+		document = rules.NewDocument(documentUri)
+		s.documents[documentUri] = document
+	} else {
+		s.logger.Printf("recieved cached document %s", documentUri)
+	}
+
+	// figure this out with cancellation tokens so the process doesn't hang
+	s.logger.Printf("starting update of source for document %s", documentUri)
+	err := document.UpdateSource(context.Background(), source)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s.logger.Printf("finished update of source for document %s", documentUri)
+
+	return document, nil
 }

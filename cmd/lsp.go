@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -15,7 +16,12 @@ var lspCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.New(os.Stderr, "[LSP] ", log.Ltime|log.Lshortfile)
 		server := lsp.NewServer(os.Stdin, os.Stdout, logger)
-		server.Run(context.Background())
+		err := server.Run(context.Background())
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 
