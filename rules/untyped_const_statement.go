@@ -7,8 +7,8 @@ import (
 )
 
 var UntypedConstStatementRule = MatchRule{
-	name:    "untyped_const_name",
-	pattern: []byte("(const_statement !type name: (name) @const_name)"),
+	name:    "untyped_const_statement",
+	pattern: []byte("[(const_statement name: (name) @const_name type: (inferred_type)) (const_statement name: (name) @const_name !type)]"),
 	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
