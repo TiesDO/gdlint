@@ -2,7 +2,6 @@ package lsp
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"log"
@@ -87,8 +86,7 @@ func (s *Server) methodInitialize() (any, error) {
 func (s *Server) methodTextDocumentDidOpen(ctx context.Context, req *jrpc.Request) (any, error) {
 	var params protocol.DidOpenTextDocumentParams
 
-	if err := json.Unmarshal(req.Params(), &params); err != nil {
-		s.logger.Printf("failed to unmarshal DidOpen params: %v\n", err)
+	if err := protocol.Unmarshal(req.Params(), &params); err != nil {
 		return nil, err
 	}
 
@@ -126,7 +124,7 @@ func (s *Server) methodTextDocumentDidOpen(ctx context.Context, req *jrpc.Reques
 func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Request) (any, error) {
 	var params protocol.DidChangeTextDocumentParams
 
-	if err := json.Unmarshal(req.Params(), &params); err != nil {
+	if err := protocol.Unmarshal(req.Params(), &params); err != nil {
 		return nil, err
 	}
 
