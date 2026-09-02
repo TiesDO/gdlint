@@ -99,11 +99,6 @@ func (s *Server) methodTextDocumentDidOpen(ctx context.Context, req *jrpc.Reques
 		return nil, err
 	}
 
-	if len(diagnostics) == 0 {
-		s.logger.Printf("no diagnostics found\n")
-		return diagnostics, nil
-	}
-
 	uri := params.TextDocument.URI
 
 	s.logger.Printf("notifying client of %d diagnostics\n", len(diagnostics))
@@ -144,11 +139,6 @@ func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Requ
 
 	if err != nil {
 		return nil, err
-	}
-
-	if len(diagnostics) == 0 {
-		s.logger.Printf("no diagnostics found\n")
-		return diagnostics, nil
 	}
 
 	uri := params.TextDocument.URI
