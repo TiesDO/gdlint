@@ -49,14 +49,10 @@ var CodeOrderRule = NodeRule{
 					prevPlural = plural
 				}
 
-				warnings = append(warnings, Warning{
-					StartLine: int(child.StartPosition().Row),
-					StartChar: int(child.StartPosition().Column),
-					EndLine:   int(child.EndPosition().Row),
-					EndChar:   int(child.EndPosition().Column),
-					Message:   fmt.Sprintf("%s should be defined before %s", nodePlural, prevPlural),
-					Offense:   "code_order",
-				})
+				message := fmt.Sprintf("%s should be defined before %s", nodePlural, prevPlural)
+				offense := "code_order"
+
+				warnings = append(warnings, *NewWarningFromNode(*child, message, offense))
 
 				currentPhase = phase
 				previousNodeName = nodeType

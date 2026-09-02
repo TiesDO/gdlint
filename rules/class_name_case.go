@@ -19,16 +19,12 @@ var ClassNameCaseRule = MatchRule{
 		node := capture.Node
 		content := string(source[node.StartByte():node.EndByte()])
 
+		message := fmt.Sprintf("class name '%s' must be PascalCase", content)
+		offense := "class_name_case"
+
 		if !util.IsPascalCase(content) {
 			return []Warning{
-				{
-					StartLine: int(node.StartPosition().Row),
-					StartChar: int(node.StartPosition().Column),
-					EndLine:   int(node.EndPosition().Row),
-					EndChar:   int(node.EndPosition().Column),
-					Message:   fmt.Sprintf("class name '%s' must be PascalCase", content),
-					Offense:   "class_name_case",
-				},
+				*NewWarningFromNode(node, message, offense),
 			}, nil
 		} else {
 			return nil, nil

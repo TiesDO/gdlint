@@ -18,15 +18,11 @@ var UntypedFunctionReturnRule = MatchRule{
 		node := capture.Node
 		content := string(source[node.StartByte():node.EndByte()])
 
+		message := fmt.Sprintf("function %s has no return type", content)
+		offense := "untyped_function_return"
+
 		warnings := make([]Warning, 1)
-		warnings[0] = Warning{
-			StartLine: int(node.StartPosition().Row),
-			StartChar: int(node.StartPosition().Column),
-			EndLine:   int(node.EndPosition().Row),
-			EndChar:   int(node.EndPosition().Column),
-			Offense:   "untyped_function_return",
-			Message:   fmt.Sprintf("function %s has no return type", content),
-		}
+		warnings[0] = *NewWarningFromNode(node, message, offense)
 
 		return warnings, nil
 	},
