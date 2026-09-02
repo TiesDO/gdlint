@@ -19,16 +19,12 @@ var ConstNameCaseRule = MatchRule{
 		node := capture.Node
 		content := string(source[node.StartByte():node.EndByte()])
 
+		message := fmt.Sprintf("const name '%s' must be CONST_CASE", content)
+		offense := "const_name_case"
+
 		if !util.IsConstCase(content) {
 			return []Warning{
-				Warning{
-					StartLine: int(node.StartPosition().Row),
-					StartChar: int(node.StartPosition().Column),
-					EndLine:   int(node.EndPosition().Row),
-					EndChar:   int(node.EndPosition().Column),
-					Message:   fmt.Sprintf("const name '%s' must be CONST_CASE", content),
-					Offense:   "const_name_case",
-				},
+				*NewWarningFromNode(node, message, offense),
 			}, nil
 		} else {
 			return nil, nil

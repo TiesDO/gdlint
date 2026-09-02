@@ -18,15 +18,11 @@ var UntypedConstStatementRule = MatchRule{
 		node := capture.Node
 		content := string(source[node.StartByte():node.EndByte()])
 
+		message := fmt.Sprintf("const %s is untyped", content)
+		offense := "untyped_const_statement"
+
 		warnings := make([]Warning, 1)
-		warnings[0] = Warning{
-			StartLine: int(node.StartPosition().Row),
-			StartChar: int(node.StartPosition().Column),
-			EndLine:   int(node.EndPosition().Row),
-			EndChar:   int(node.EndPosition().Column),
-			Offense:   "untyped_const_statement",
-			Message:   fmt.Sprintf("const %s is untyped", content),
-		}
+		warnings[0] = *NewWarningFromNode(node, message, offense)
 
 		return warnings, nil
 	},

@@ -18,15 +18,11 @@ var UntypedFunctionArgumentRule = MatchRule{
 		node := capture.Node
 		content := string(source[node.StartByte():node.EndByte()])
 
+		message := fmt.Sprintf("untyped argument %s", content)
+		offense := "untyped_function_argument"
+
 		warnings := make([]Warning, 1)
-		warnings[0] = Warning{
-			StartLine: int(node.StartPosition().Row),
-			StartChar: int(node.StartPosition().Column),
-			EndLine:   int(node.EndPosition().Row),
-			EndChar:   int(node.EndPosition().Column),
-			Offense:   "untyped_function_argument",
-			Message:   fmt.Sprintf("untyped argument %s", content),
-		}
+		warnings[0] = *NewWarningFromNode(node, message, offense)
 
 		return warnings, nil
 	},
