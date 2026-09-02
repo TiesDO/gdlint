@@ -23,9 +23,9 @@ func TestUntypedFunctionReturn(t *testing.T) {
 
 	expected := []rules.Warning{
 		{
-			StartLine: 12,
+			StartLine: 16,
 			StartChar: 5,
-			EndLine:   12,
+			EndLine:   16,
 			EndChar:   9,
 			Message:   "function bazz has no return type",
 			Offense:   "untyped_function_return",

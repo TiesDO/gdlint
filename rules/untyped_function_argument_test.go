@@ -23,9 +23,9 @@ func TestUntypedFunctionArgument(t *testing.T) {
 
 	expected := []rules.Warning{
 		{
-			StartLine: 12,
+			StartLine: 16,
 			StartChar: 10,
-			EndLine:   12,
+			EndLine:   16,
 			EndChar:   11,
 			Message:   "untyped argument m",
 			Offense:   "untyped_function_argument"},
