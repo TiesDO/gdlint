@@ -7,9 +7,9 @@ import (
 )
 
 var UntypedVariableStatementRule = MatchRule{
-	name:    "untyped_variable_statement",
-	pattern: []byte("(variable_statement !type name: (name) @untyped_var)"),
-	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Name:    "untyped_variable_statement",
+	Pattern: []byte("(variable_statement !type name: (name) @untyped_var)"),
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}

@@ -49,7 +49,7 @@ func NewDocumentFromFixture(t *testing.T, fixtureName string) *rules.Document {
 
 func NewRunnerWithRule(t *testing.T, rule rules.Rule) *rules.DocumentRunner {
 	runner := rules.NewDocumentRunner(&rules.DefaultRuleRegistry)
-	err := runner.SetRules([]string{rule.Name()})
+	err := runner.SetRules([]string{rule.Identifier()})
 
 	if err != nil {
 		t.Fatal(err)

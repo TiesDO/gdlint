@@ -7,9 +7,9 @@ import (
 )
 
 var UntypedFunctionReturnRule = MatchRule{
-	name:    "untyped_function_return",
-	pattern: []byte("(function_definition !return_type name: (name) @untyped_return)"),
-	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Name:    "untyped_function_return",
+	Pattern: []byte("(function_definition !return_type name: (name) @untyped_return)"),
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}

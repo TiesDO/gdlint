@@ -8,9 +8,9 @@ import (
 )
 
 var ClassNameCaseRule = MatchRule{
-	name:    "class_name_case",
-	pattern: []byte("[(class_name_statement name: (name) @class_name) (class_definition name: (name) @class_definition)]"),
-	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Name:    "class_name_case",
+	Pattern: []byte("[(class_name_statement name: (name) @class_name) (class_definition name: (name) @class_definition)]"),
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}

@@ -30,24 +30,24 @@ func (r *RuleRegistry) RuleExists(name string) bool {
 }
 
 func (r *RuleRegistry) RegisterMatchRule(rule *MatchRule) error {
-	exists := r.RuleExists(rule.name)
+	exists := r.RuleExists(rule.Name)
 
 	if exists {
-		return fmt.Errorf("already registered a rule with name '%s'", rule.name)
+		return fmt.Errorf("already registered a rule with name '%s'", rule.Name)
 	}
 
-	r.match_rules[rule.name] = rule
+	r.match_rules[rule.Name] = rule
 	return nil
 }
 
 func (r *RuleRegistry) RegisterNodeRule(rule *NodeRule) error {
-	exists := r.RuleExists(rule.name)
+	exists := r.RuleExists(rule.Name)
 
 	if exists {
-		return fmt.Errorf("already registered a rule with name '%s'", rule.name)
+		return fmt.Errorf("already registered a rule with name '%s'", rule.Name)
 	}
 
-	r.node_rules[rule.name] = rule
+	r.node_rules[rule.Name] = rule
 	return nil
 }
 
@@ -67,11 +67,11 @@ func (r *RuleRegistry) RuleNames() []string {
 	names := make([]string, 0)
 
 	for _, rule := range r.match_rules {
-		names = append(names, rule.name)
+		names = append(names, rule.Name)
 	}
 
 	for _, rule := range r.node_rules {
-		names = append(names, rule.name)
+		names = append(names, rule.Name)
 	}
 
 	return names

@@ -5,32 +5,24 @@ import (
 )
 
 type Rule interface {
-	Name() string
+	Identifier() string
 }
 
 type MatchRule struct {
-	name    string
-	execute func(*sitter.QueryMatch, []byte) ([]Warning, error)
-	pattern []byte
+	Name    string
+	Execute func(*sitter.QueryMatch, []byte) ([]Warning, error)
+	Pattern []byte
 }
 
-func (r *MatchRule) Name() string {
-	return r.name
-}
-
-func (r *MatchRule) Execute(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
-	return r.execute(match, source)
+func (r *MatchRule) Identifier() string {
+	return r.Name
 }
 
 type NodeRule struct {
-	name    string
-	execute func(*sitter.Node, []byte) ([]Warning, error)
+	Name    string
+	Execute func(*sitter.Node, []byte) ([]Warning, error)
 }
 
-func (r *NodeRule) Name() string {
-	return r.name
-}
-
-func (r *NodeRule) Execute(node *sitter.Node, source []byte) ([]Warning, error) {
-	return r.execute(node, source)
+func (r *NodeRule) Identifier() string {
+	return r.Name
 }

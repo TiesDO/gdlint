@@ -118,7 +118,7 @@ func (r *DocumentRunner) buildMatchRulePattern() (string, error) {
 	var builder strings.Builder
 
 	for _, rule := range r.matchRules {
-		_, err := builder.Write(rule.pattern)
+		_, err := builder.Write(rule.Pattern)
 
 		if err != nil {
 			return "", err

@@ -19,8 +19,8 @@ var pluralMap map[string]string = map[string]string{
 }
 
 var CodeOrderRule = NodeRule{
-	name: "code_order",
-	execute: func(node *sitter.Node, source []byte) ([]Warning, error) {
+	Name: "code_order",
+	Execute: func(node *sitter.Node, source []byte) ([]Warning, error) {
 		currentPhase := 1
 		previousNodeName := "annotation"
 

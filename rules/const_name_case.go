@@ -8,9 +8,9 @@ import (
 )
 
 var ConstNameCaseRule = MatchRule{
-	name:    "const_name_case",
-	pattern: []byte("(const_statement name: (name) @const_name)"),
-	execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Name:    "const_name_case",
+	Pattern: []byte("(const_statement name: (name) @const_name)"),
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
