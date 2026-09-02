@@ -30,9 +30,9 @@ func TestUntypedVariableStatements(t *testing.T) {
 			Message:   "variable c is untyped",
 			Offense:   "untyped_variable_statement",
 		}, {
-			StartLine: 7,
+			StartLine: 11,
 			StartChar: 5,
-			EndLine:   7,
+			EndLine:   11,
 			EndChar:   6,
 			Message:   "variable z is untyped",
 			Offense:   "untyped_variable_statement",
