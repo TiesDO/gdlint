@@ -311,7 +311,7 @@ func (r *RuleRunner) runMatchRules(rules []*MatchRule) ([]Warning, error) {
 	query, qerr := sitter.NewQuery(r.language, pattern_buf.String())
 
 	if qerr != nil {
-		return nil, fmt.Errorf("failed to create query: %v", err)
+		return nil, fmt.Errorf("failed to create query: %v", qerr.Message)
 	}
 
 	cursor := sitter.NewQueryCursor()
