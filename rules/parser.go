@@ -28,7 +28,7 @@ func NewParser() *Parser {
 }
 
 func (p *Parser) Parse(ctx context.Context, source []byte) error {
-	tree := p.parser.ParseCtx(ctx, source, p.tree)
+	tree := p.parser.ParseCtx(ctx, source, nil)
 
 	if tree == nil {
 		return errors.New("failed to parse tree")
