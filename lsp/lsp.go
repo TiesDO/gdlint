@@ -52,21 +52,26 @@ func (s *Server) Run(ctx context.Context) {
 	<-s.conn.Done()
 }
 
-func (s *Server) handler(ctx context.Context, req *jrpc.Request) (any, error) {
+func (s *Server) handler(ctx context.Context, req *jrpc.Request) (response any, err error) {
 	s.logger.Println("handler called with method", req.Method())
 
 	switch req.Method() {
 	case protocol.MethodInitialize:
-		return s.methodInitialize()
+		response, err = s.methodInitialize()
 	case protocol.MethodTextDocumentDidOpen:
-		return s.methodTextDocumentDidOpen(ctx, req)
+		response, err = s.methodTextDocumentDidOpen(ctx, req)
 	case protocol.MethodTextDocumentDidChange:
-		return s.methodTextDocumentDidChange(ctx, req)
+		response, err = s.methodTextDocumentDidChange(ctx, req)
 	case protocol.MethodShutdown:
+		s.logger.Println("executing method called")
 		return nil, nil
 	}
 
-	return nil, nil
+	if err != nil {
+		s.logger.Printf("error while handling method: %v\n", err)
+	}
+
+	return response, err
 }
 
 func (s *Server) methodInitialize() (any, error) {
@@ -95,7 +100,6 @@ func (s *Server) methodTextDocumentDidOpen(ctx context.Context, req *jrpc.Reques
 	diagnostics, err := s.runDiagnostics(ctx, source)
 
 	if err != nil {
-		s.logger.Printf("failed to run diagnostics: %v\n", err)
 		return nil, err
 	}
 
@@ -108,12 +112,7 @@ func (s *Server) methodTextDocumentDidOpen(ctx context.Context, req *jrpc.Reques
 		Diagnostics: diagnostics,
 	})
 
-	if err != nil {
-		s.logger.Printf("failed to notify diagnostics: %v\n", err)
-		return nil, err
-	}
-
-	return nil, nil
+	return nil, err
 }
 
 func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Request) (any, error) {
@@ -124,6 +123,7 @@ func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Requ
 	}
 
 	if len(params.ContentChanges) == 0 {
+		s.logger.Printf("no content changes detected, aborting\n")
 		return nil, nil
 	}
 
@@ -143,16 +143,14 @@ func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Requ
 
 	uri := params.TextDocument.URI
 
+	s.logger.Printf("notifying client of %d diagnostics\n", len(diagnostics))
+
 	err = s.conn.Notify(ctx, protocol.MethodTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
 		URI:         uri,
 		Diagnostics: diagnostics,
 	})
 
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
+	return nil, err
 }
 
 func (s *Server) runDiagnostics(ctx context.Context, source []byte) ([]protocol.Diagnostic, error) {
