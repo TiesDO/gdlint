@@ -1,7 +1,6 @@
 package rules_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/TiesDO/gdlint/rules"
@@ -9,13 +8,10 @@ import (
 )
 
 func TestUntypedConstStatements(t *testing.T) {
-	runner, err := createDefaultRunnerFromFixture("typed_assignments.gd")
+	document := NewDocumentFromFixture(t, "typed_assignments.gd")
+	runner := NewRunnerWithRule(t, &rules.UntypedConstStatementRule)
 
-	if err != nil {
-		t.Error(err)
-	}
-
-	warnings, err := runner.RunRules([]string{rules.UntypedConstStatementRule.Name()}, context.Background())
+	warnings, err := runner.CheckDocument(document)
 
 	if err != nil {
 		t.Error(err)

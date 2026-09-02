@@ -1,12 +1,15 @@
 package rules_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"testing"
 
 	"github.com/TiesDO/gdlint/rules"
+	"go.lsp.dev/uri"
 )
 
 func loadFixture(name string) ([]byte, error) {
@@ -27,12 +30,30 @@ func loadFixture(name string) ([]byte, error) {
 	return data, nil
 }
 
-func createDefaultRunnerFromFixture(fixture_path string) (rules.RuleRunner, error) {
-	source, err := loadFixture(fixture_path)
+func NewDocumentFromFixture(t *testing.T, fixtureName string) *rules.Document {
+	source, err := loadFixture(fixtureName)
 
 	if err != nil {
-		return rules.RuleRunner{}, err
+		t.Fatal(err)
 	}
 
-	return rules.NewRuleRunner(&rules.DefaultRuleRegistry, source), nil
+	document := rules.NewDocument(uri.URI(fmt.Sprintf("file:///%s", fixtureName)))
+	err = document.UpdateSource(context.Background(), source)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return document
+}
+
+func NewRunnerWithRule(t *testing.T, rule rules.Rule) *rules.DocumentRunner {
+	runner := rules.NewDocumentRunner(&rules.DefaultRuleRegistry)
+	err := runner.SetRules([]string{rule.Name()})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return runner
 }

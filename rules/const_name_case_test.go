@@ -1,7 +1,6 @@
 package rules_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/TiesDO/gdlint/rules"
@@ -9,16 +8,13 @@ import (
 )
 
 func TestConstNameCase(t *testing.T) {
-	runner, err := createDefaultRunnerFromFixture("naming_conventions.gd")
+	document := NewDocumentFromFixture(t, "naming_conventions.gd")
+	runner := NewRunnerWithRule(t, &rules.ConstNameCaseRule)
+
+	warnings, err := runner.CheckDocument(document)
 
 	if err != nil {
-		t.Error(err)
-	}
-
-	warnings, err := runner.RunRules([]string{rules.ConstNameCaseRule.Name()}, context.Background())
-
-	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	expected := []rules.Warning{

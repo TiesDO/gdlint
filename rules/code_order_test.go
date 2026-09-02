@@ -1,7 +1,6 @@
 package rules_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/TiesDO/gdlint/rules"
@@ -9,13 +8,10 @@ import (
 )
 
 func TestCorrectCodeOrder(t *testing.T) {
-	runner, err := createDefaultRunnerFromFixture("correct_code_ordering.gd")
+	document := NewDocumentFromFixture(t, "correct_code_ordering.gd")
+	runner := NewRunnerWithRule(t, &rules.CodeOrderRule)
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	warnings, err := runner.RunRules([]string{"code_order"}, context.Background())
+	warnings, err := runner.CheckDocument(document)
 
 	if err != nil {
 		t.Error(err)
@@ -25,13 +21,10 @@ func TestCorrectCodeOrder(t *testing.T) {
 }
 
 func TestIncorrectCodeOrder(t *testing.T) {
-	runner, err := createDefaultRunnerFromFixture("incorrect_code_ordering.gd")
+	document := NewDocumentFromFixture(t, "incorrect_code_ordering.gd")
+	runner := NewRunnerWithRule(t, &rules.CodeOrderRule)
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	warnings, err := runner.RunRules([]string{"code_order"}, context.Background())
+	warnings, err := runner.CheckDocument(document)
 
 	if err != nil {
 		t.Error(err)

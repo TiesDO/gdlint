@@ -1,7 +1,6 @@
 package rules_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/TiesDO/gdlint/rules"
@@ -9,13 +8,10 @@ import (
 )
 
 func TestClassNameCase(t *testing.T) {
-	runner, err := createDefaultRunnerFromFixture("class_declarations.gd")
+	document := NewDocumentFromFixture(t, "class_declarations.gd")
+	runner := NewRunnerWithRule(t, &rules.ClassNameCaseRule)
 
-	if err != nil {
-		t.Error(err)
-	}
-
-	warnings, err := runner.RunRules([]string{rules.ClassNameCaseRule.Name()}, context.Background())
+	warnings, err := runner.CheckDocument(document)
 
 	if err != nil {
 		t.Error(err)
