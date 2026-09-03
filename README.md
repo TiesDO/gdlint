@@ -52,4 +52,64 @@ TODO
 
 # Roadmap
 
-TODO
+## Rules
+
+- [ ] detect missing type declarations\
+  - [x] variables / constants
+  - [x] function arguments
+  - [x] function return types
+  - [ ] signals
+- [ ] detect name casing
+  - [x] functions
+  - [x] variables / constants
+  - [x] classes
+  - [ ] signals
+  - [ ] files
+  - [ ] enums + members
+- [ ] ordering (top level)
+- [ ] whitespace
+  - [ ] variable assignments
+  - [ ] conditions
+  - [ ] math operations
+- [ ] formatting
+  - [ ] line length
+  - [ ] blank lines
+  - [ ] array, enum, dict elements alignment
+  - [ ] quote style
+  - [ ] numbers
+    - [ ] underscore usage
+    - [ ] float decimal
+    - [ ] hex caps
+  - [ ] single line ternary
+- [ ] pattern detection
+  - [ ] simplified loops with higher level method
+  - [ ] unused locals/privates
+  - [ ] unreachable code
+
+## Fixes
+
+- [ ] ordering
+- [ ] whitespace
+- [ ] formatting
+- [ ] pattern detection
+
+## Capabilities
+
+- [x] built in rule detection
+- [x] cli check command
+- [ ] cli fix command
+- [x] lsp didOpen/didChange
+- [x] lsp publishDiagnostics
+- [ ] lsp didSave
+- [ ] lsp code actions (workspace/applyEdits)
+- [ ] lsp textDocument/formatting
+- [ ] lsp workspace/diagnostics
+- [ ] lsp workspace/didChangeWatchedFiles
+- [ ] configuration file
+  - [ ] ignored rules
+  - [ ] excluded/included files
+  - [ ] severity level per rule
+  - [ ] overridable settings
+    - [ ] line length
+    - [ ] default string quote
+- [ ] inline disable/enable comments
