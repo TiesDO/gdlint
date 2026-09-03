@@ -77,6 +77,13 @@ var checkCmd = &cobra.Command{
 			target_rules = included_rules
 		}
 
+		err = runner.SetRules(target_rules)
+
+		if err != nil {
+			fmt.Printf("failed to set rules: %v\n", err)
+			os.Exit(1)
+		}
+
 		warnings, err := runner.CheckDocument(document)
 
 		if err != nil {
