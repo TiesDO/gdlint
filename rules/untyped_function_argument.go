@@ -10,7 +10,7 @@ import (
 var UntypedFunctionArgumentRule = core.MatchRule{
 	Name:    "untyped_function_argument",
 	Pattern: []byte("(function_definition parameters: (parameters (identifier) @untyped_function_argument))"),
-	Execute: func(match *sitter.QueryMatch, source []byte) ([]core.Warning, error) {
+	Execute: func(match *sitter.QueryMatch, _ *sitter.Query, source []byte) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
@@ -28,5 +28,3 @@ var UntypedFunctionArgumentRule = core.MatchRule{
 		return warnings, nil
 	},
 }
-
-

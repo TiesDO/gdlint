@@ -33,7 +33,7 @@ func TestParserQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	matches, err := parser.Query("(variable_statement name: (name) @name)", source)
+	matches, _, err := parser.Query("(variable_statement name: (name) @name)", source)
 
 	if err != nil {
 		t.Fatal(err)

@@ -10,7 +10,7 @@ type Rule interface {
 
 type MatchRule struct {
 	Name    string
-	Execute func(*sitter.QueryMatch, []byte) ([]Warning, error)
+	Execute func(match *sitter.QueryMatch, query *sitter.Query, source []byte) ([]Warning, error)
 	Pattern []byte
 }
 

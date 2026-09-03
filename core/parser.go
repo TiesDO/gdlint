@@ -48,17 +48,17 @@ func (p *Parser) String() string {
 	return builder.String()
 }
 
-func (p *Parser) Query(pattern string, source []byte) (*sitter.QueryMatches, error) {
+func (p *Parser) Query(pattern string, source []byte) (*sitter.QueryMatches, *sitter.Query, error) {
 	query, qerr := sitter.NewQuery(p.language, pattern)
 
 	if qerr != nil {
-		return nil, fmt.Errorf("failed to create query: %v", qerr.Message)
+		return nil, nil, fmt.Errorf("failed to create query: %v", qerr.Message)
 	}
 
 	cursor := sitter.NewQueryCursor()
 	matches := cursor.Matches(query, p.tree.RootNode(), source)
 
-	return &matches, nil
+	return &matches, query, nil
 }
 
 func (p *Parser) SQuery(pattern string, source []byte) (string, error) {

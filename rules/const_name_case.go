@@ -11,7 +11,7 @@ import (
 var ConstNameCaseRule = core.MatchRule{
 	Name:    "const_name_case",
 	Pattern: []byte("(const_statement name: (name) @const_name)"),
-	Execute: func(match *sitter.QueryMatch, source []byte) ([]core.Warning, error) {
+	Execute: func(match *sitter.QueryMatch, _ *sitter.Query, source []byte) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
@@ -32,5 +32,3 @@ var ConstNameCaseRule = core.MatchRule{
 		}
 	},
 }
-
-

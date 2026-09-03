@@ -91,7 +91,11 @@ func (r *DocumentRunner) runMatchRules(doc *Document) ([]Warning, error) {
 		return nil, err
 	}
 
-	matches, err := doc.Query(pattern)
+	matches, query, err := doc.Query(pattern)
+
+	if err != nil {
+		return nil, err
+	}
 
 	warnings := []Warning{}
 
@@ -104,7 +108,7 @@ func (r *DocumentRunner) runMatchRules(doc *Document) ([]Warning, error) {
 
 		rule := r.matchRules[match.PatternIndex]
 
-		foundWarnings, err := rule.Execute(match, doc.source)
+		foundWarnings, err := rule.Execute(match, query, doc.source)
 
 		if err != nil {
 			return nil, err

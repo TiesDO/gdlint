@@ -40,6 +40,6 @@ func (d *Document) UpdateSource(ctx context.Context, source []byte) error {
 	return d.parser.Parse(parseCtx, d.source)
 }
 
-func (d *Document) Query(pattern string) (*sitter.QueryMatches, error) {
+func (d *Document) Query(pattern string) (*sitter.QueryMatches, *sitter.Query, error) {
 	return d.parser.Query(pattern, d.source)
 }
