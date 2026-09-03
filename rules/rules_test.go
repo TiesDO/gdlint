@@ -9,8 +9,13 @@ import (
 	"testing"
 
 	"github.com/TiesDO/gdlint/core"
+	"github.com/TiesDO/gdlint/rules"
 	"go.lsp.dev/uri"
 )
+
+func init() {
+	rules.RegisterAll(&core.DefaultRuleRegistry)
+}
 
 func loadFixture(name string) ([]byte, error) {
 	_, filename, _, ok := runtime.Caller(0)

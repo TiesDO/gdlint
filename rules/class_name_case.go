@@ -33,6 +33,4 @@ var ClassNameCaseRule = core.MatchRule{
 	},
 }
 
-func init() {
-	core.DefaultRuleRegistry.MustRegisterMatchRule(&ClassNameCaseRule)
-}
+

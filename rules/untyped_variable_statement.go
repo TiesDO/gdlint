@@ -29,6 +29,4 @@ var UntypedVariableStatementRule = core.MatchRule{
 	},
 }
 
-func init() {
-	core.DefaultRuleRegistry.MustRegisterMatchRule(&UntypedVariableStatementRule)
-}
+

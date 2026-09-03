@@ -29,6 +29,4 @@ var UntypedFunctionReturnRule = core.MatchRule{
 	},
 }
 
-func init() {
-	core.DefaultRuleRegistry.MustRegisterMatchRule(&UntypedFunctionReturnRule)
-}
+

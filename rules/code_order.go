@@ -67,6 +67,4 @@ var CodeOrderRule = core.NodeRule{
 	},
 }
 
-func init() {
-	core.DefaultRuleRegistry.MustRegisterNodeRule(&CodeOrderRule)
-}
+

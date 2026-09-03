@@ -33,6 +33,4 @@ var ConstNameCaseRule = core.MatchRule{
 	},
 }
 
-func init() {
-	core.DefaultRuleRegistry.MustRegisterMatchRule(&ConstNameCaseRule)
-}
+

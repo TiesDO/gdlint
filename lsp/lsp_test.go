@@ -4,8 +4,13 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/TiesDO/gdlint/rules" // This is a hack to ensure the init() functions of the rules run
+	"github.com/TiesDO/gdlint/core"
+	"github.com/TiesDO/gdlint/rules"
 )
+
+func init() {
+	rules.RegisterAll(&core.DefaultRuleRegistry)
+}
 
 func TestDiagnosticsOnDidOpen(t *testing.T) {
 	client := NewTestClient(t)
