@@ -1,7 +1,8 @@
-package rules
+package core
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -9,6 +10,7 @@ type DocumentRunner struct {
 	registry   *RuleRegistry
 	nodeRules  []*NodeRule
 	matchRules []*MatchRule
+	logger     log.Logger
 }
 
 func NewDocumentRunner(registry *RuleRegistry) *DocumentRunner {

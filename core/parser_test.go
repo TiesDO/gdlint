@@ -1,15 +1,15 @@
-package rules_test
+package core_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/TiesDO/gdlint/rules"
+	"github.com/TiesDO/gdlint/core"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParserString(t *testing.T) {
-	parser := rules.NewParser()
+	parser := core.NewParser()
 
 	err := parser.Parse(context.Background(), []byte("var x = 2"))
 
@@ -24,7 +24,7 @@ func TestParserString(t *testing.T) {
 }
 
 func TestParserQuery(t *testing.T) {
-	parser := rules.NewParser()
+	parser := core.NewParser()
 
 	source := []byte("var x = 2")
 	err := parser.Parse(context.Background(), source)
@@ -54,7 +54,7 @@ func TestParserQuery(t *testing.T) {
 }
 
 func TestParserSQuery(t *testing.T) {
-	parser := rules.NewParser()
+	parser := core.NewParser()
 
 	source := []byte("var x = 2")
 	err := parser.Parse(context.Background(), source)

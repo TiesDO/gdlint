@@ -3,6 +3,7 @@ package rules_test
 import (
 	"testing"
 
+	"github.com/TiesDO/gdlint/core"
 	"github.com/TiesDO/gdlint/rules"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func TestConstNameCase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []rules.Warning{
+	expected := []core.Warning{
 		{
 			StartLine: 4,
 			StartChar: 6,

@@ -3,13 +3,14 @@ package rules
 import (
 	"fmt"
 
+	"github.com/TiesDO/gdlint/core"
 	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
-var UntypedConstStatementRule = MatchRule{
+var UntypedConstStatementRule = core.MatchRule{
 	Name:    "untyped_const_statement",
 	Pattern: []byte("[(const_statement name: (name) @const_name type: (inferred_type)) (const_statement name: (name) @const_name !type)]"),
-	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
@@ -21,13 +22,13 @@ var UntypedConstStatementRule = MatchRule{
 		message := fmt.Sprintf("const %s is untyped", content)
 		offense := "untyped_const_statement"
 
-		warnings := make([]Warning, 1)
-		warnings[0] = *NewWarningFromNode(node, message, offense)
+		warnings := make([]core.Warning, 1)
+		warnings[0] = *core.NewWarningFromNode(node, message, offense)
 
 		return warnings, nil
 	},
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterMatchRule(&UntypedConstStatementRule)
+	core.DefaultRuleRegistry.MustRegisterMatchRule(&UntypedConstStatementRule)
 }

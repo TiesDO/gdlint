@@ -3,6 +3,8 @@ package lsp_test
 import (
 	"testing"
 	"time"
+
+	_ "github.com/TiesDO/gdlint/rules" // This is a hack to ensure the init() functions of the rules run
 )
 
 func TestDiagnosticsOnDidOpen(t *testing.T) {

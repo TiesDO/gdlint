@@ -3,14 +3,15 @@ package rules
 import (
 	"fmt"
 
+	"github.com/TiesDO/gdlint/core"
 	"github.com/TiesDO/gdlint/util"
 	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
-var ClassNameCaseRule = MatchRule{
+var ClassNameCaseRule = core.MatchRule{
 	Name:    "class_name_case",
 	Pattern: []byte("[(class_name_statement name: (name) @class_name) (class_definition name: (name) @class_definition)]"),
-	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
@@ -23,8 +24,8 @@ var ClassNameCaseRule = MatchRule{
 		offense := "class_name_case"
 
 		if !util.IsPascalCase(content) {
-			return []Warning{
-				*NewWarningFromNode(node, message, offense),
+			return []core.Warning{
+				*core.NewWarningFromNode(node, message, offense),
 			}, nil
 		} else {
 			return nil, nil
@@ -33,5 +34,5 @@ var ClassNameCaseRule = MatchRule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterMatchRule(&ClassNameCaseRule)
+	core.DefaultRuleRegistry.MustRegisterMatchRule(&ClassNameCaseRule)
 }

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/TiesDO/gdlint/rules"
+	"github.com/TiesDO/gdlint/core"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ var debugQueryCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		parser := rules.NewParser()
+		parser := core.NewParser()
 		err = parser.Parse(context.Background(), content)
 
 		if err != nil {

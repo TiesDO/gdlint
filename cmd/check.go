@@ -8,7 +8,7 @@ import (
 
 	"path/filepath"
 
-	"github.com/TiesDO/gdlint/rules"
+	"github.com/TiesDO/gdlint/core"
 	"github.com/spf13/cobra"
 	"go.lsp.dev/uri"
 )
@@ -34,7 +34,7 @@ var checkCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		document := rules.NewDocument(uri.URI(path))
+		document := core.NewDocument(uri.URI(path))
 
 		err = document.UpdateSource(context.Background(), content)
 
@@ -43,7 +43,7 @@ var checkCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		runner := rules.NewDocumentRunner(&rules.DefaultRuleRegistry)
+		runner := core.NewDocumentRunner(&core.DefaultRuleRegistry)
 
 		included_rules, err := cmd.Flags().GetStringSlice("include")
 
@@ -53,7 +53,7 @@ var checkCmd = &cobra.Command{
 		}
 
 		if len(included_rules) == 0 {
-			included_rules = rules.DefaultRuleRegistry.RuleNames()
+			included_rules = core.DefaultRuleRegistry.RuleNames()
 		}
 
 		excluded_rules, err := cmd.Flags().GetStringSlice("exclude")

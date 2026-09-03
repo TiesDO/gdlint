@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/TiesDO/gdlint/rules"
+	"github.com/TiesDO/gdlint/core"
 	jrpc "go.lsp.dev/jsonrpc2"
 	"go.lsp.dev/protocol"
 	"go.lsp.dev/uri"
@@ -26,8 +26,8 @@ type Server struct {
 	stream    jrpc.Stream
 	conn      jrpc.Conn
 	logger    *log.Logger
-	documents map[uri.URI]*rules.Document
-	runner    *rules.DocumentRunner
+	documents map[uri.URI]*core.Document
+	runner    *core.DocumentRunner
 }
 
 func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Server {
@@ -37,8 +37,8 @@ func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Serv
 
 	server := Server{
 		logger:    logger,
-		documents: map[uri.URI]*rules.Document{},
-		runner:    rules.NewDocumentRunner(&rules.DefaultRuleRegistry),
+		documents: map[uri.URI]*core.Document{},
+		runner:    core.NewDocumentRunner(&core.DefaultRuleRegistry),
 	}
 
 	server.stream = jrpc.NewStream(stdio{
@@ -54,7 +54,7 @@ func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Serv
 
 func (s *Server) Run(ctx context.Context) error {
 	// TODO: read requested ruleset from a config
-	err := s.runner.SetRules(rules.DefaultRuleRegistry.RuleNames())
+	err := s.runner.SetRules(core.DefaultRuleRegistry.RuleNames())
 
 	if err != nil {
 		return fmt.Errorf("failed to start server: %w", err)
@@ -167,7 +167,7 @@ func (s *Server) methodTextDocumentDidChange(ctx context.Context, req *jrpc.Requ
 	return nil, err
 }
 
-func (s *Server) runDiagnostics(document *rules.Document) ([]protocol.Diagnostic, error) {
+func (s *Server) runDiagnostics(document *core.Document) ([]protocol.Diagnostic, error) {
 	warnings, err := s.runner.CheckDocument(document)
 
 	if err != nil {
@@ -202,12 +202,12 @@ func (s *Server) runDiagnostics(document *rules.Document) ([]protocol.Diagnostic
 	return diagnostics, nil
 }
 
-func (s *Server) ensureDocumentExists(documentUri uri.URI, source []byte) (*rules.Document, error) {
+func (s *Server) ensureDocumentExists(documentUri uri.URI, source []byte) (*core.Document, error) {
 	document, ok := s.documents[documentUri]
 
 	if !ok {
 		s.logger.Printf("recieved new document %s", documentUri)
-		document = rules.NewDocument(documentUri)
+		document = core.NewDocument(documentUri)
 		s.documents[documentUri] = document
 	} else {
 		s.logger.Printf("recieved cached document %s", documentUri)

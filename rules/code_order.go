@@ -3,6 +3,7 @@ package rules
 import (
 	"fmt"
 
+	"github.com/TiesDO/gdlint/core"
 	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
@@ -18,13 +19,13 @@ var pluralMap map[string]string = map[string]string{
 	"extends_statement":    "extends_statements",
 }
 
-var CodeOrderRule = NodeRule{
+var CodeOrderRule = core.NodeRule{
 	Name: "code_order",
-	Execute: func(node *sitter.Node, source []byte) ([]Warning, error) {
+	Execute: func(node *sitter.Node, source []byte) ([]core.Warning, error) {
 		currentPhase := 1
 		previousNodeName := "annotation"
 
-		warnings := make([]Warning, 0)
+		warnings := make([]core.Warning, 0)
 
 		for i := range node.ChildCount() {
 			child := node.Child(uint(i))
@@ -52,7 +53,7 @@ var CodeOrderRule = NodeRule{
 				message := fmt.Sprintf("%s should be defined before %s", nodePlural, prevPlural)
 				offense := "code_order"
 
-				warnings = append(warnings, *NewWarningFromNode(*child, message, offense))
+				warnings = append(warnings, *core.NewWarningFromNode(*child, message, offense))
 
 				currentPhase = phase
 				previousNodeName = nodeType
@@ -67,5 +68,5 @@ var CodeOrderRule = NodeRule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterNodeRule(&CodeOrderRule)
+	core.DefaultRuleRegistry.MustRegisterNodeRule(&CodeOrderRule)
 }

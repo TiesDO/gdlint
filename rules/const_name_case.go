@@ -3,14 +3,15 @@ package rules
 import (
 	"fmt"
 
+	"github.com/TiesDO/gdlint/core"
 	"github.com/TiesDO/gdlint/util"
 	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
-var ConstNameCaseRule = MatchRule{
+var ConstNameCaseRule = core.MatchRule{
 	Name:    "const_name_case",
 	Pattern: []byte("(const_statement name: (name) @const_name)"),
-	Execute: func(match *sitter.QueryMatch, source []byte) ([]Warning, error) {
+	Execute: func(match *sitter.QueryMatch, source []byte) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
@@ -23,8 +24,8 @@ var ConstNameCaseRule = MatchRule{
 		offense := "const_name_case"
 
 		if !util.IsConstCase(content) {
-			return []Warning{
-				*NewWarningFromNode(node, message, offense),
+			return []core.Warning{
+				*core.NewWarningFromNode(node, message, offense),
 			}, nil
 		} else {
 			return nil, nil
@@ -33,5 +34,5 @@ var ConstNameCaseRule = MatchRule{
 }
 
 func init() {
-	DefaultRuleRegistry.RegisterMatchRule(&ConstNameCaseRule)
+	core.DefaultRuleRegistry.MustRegisterMatchRule(&ConstNameCaseRule)
 }

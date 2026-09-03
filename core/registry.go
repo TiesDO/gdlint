@@ -1,4 +1,4 @@
-package rules
+package core
 
 import "fmt"
 
@@ -29,26 +29,24 @@ func (r *RuleRegistry) RuleExists(name string) bool {
 	return false
 }
 
-func (r *RuleRegistry) RegisterMatchRule(rule *MatchRule) error {
+func (r *RuleRegistry) MustRegisterMatchRule(rule *MatchRule) {
 	exists := r.RuleExists(rule.Name)
 
 	if exists {
-		return fmt.Errorf("already registered a rule with name '%s'", rule.Name)
+		panic(fmt.Errorf("already registered a rule with name '%s'", rule.Name))
 	}
 
 	r.match_rules[rule.Name] = rule
-	return nil
 }
 
-func (r *RuleRegistry) RegisterNodeRule(rule *NodeRule) error {
+func (r *RuleRegistry) MustRegisterNodeRule(rule *NodeRule) {
 	exists := r.RuleExists(rule.Name)
 
 	if exists {
-		return fmt.Errorf("already registered a rule with name '%s'", rule.Name)
+		panic(fmt.Errorf("already registered a rule with name '%s'", rule.Name))
 	}
 
 	r.node_rules[rule.Name] = rule
-	return nil
 }
 
 func (r *RuleRegistry) GetByName(name string) Rule {

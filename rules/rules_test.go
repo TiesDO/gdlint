@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/TiesDO/gdlint/rules"
+	"github.com/TiesDO/gdlint/core"
 	"go.lsp.dev/uri"
 )
 
@@ -30,14 +30,14 @@ func loadFixture(name string) ([]byte, error) {
 	return data, nil
 }
 
-func NewDocumentFromFixture(t *testing.T, fixtureName string) *rules.Document {
+func NewDocumentFromFixture(t *testing.T, fixtureName string) *core.Document {
 	source, err := loadFixture(fixtureName)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	document := rules.NewDocument(uri.URI(fmt.Sprintf("file:///%s", fixtureName)))
+	document := core.NewDocument(uri.URI(fmt.Sprintf("file:///%s", fixtureName)))
 	err = document.UpdateSource(context.Background(), source)
 
 	if err != nil {
@@ -47,8 +47,8 @@ func NewDocumentFromFixture(t *testing.T, fixtureName string) *rules.Document {
 	return document
 }
 
-func NewRunnerWithRule(t *testing.T, rule rules.Rule) *rules.DocumentRunner {
-	runner := rules.NewDocumentRunner(&rules.DefaultRuleRegistry)
+func NewRunnerWithRule(t *testing.T, rule core.Rule) *core.DocumentRunner {
+	runner := core.NewDocumentRunner(&core.DefaultRuleRegistry)
 	err := runner.SetRules([]string{rule.Identifier()})
 
 	if err != nil {

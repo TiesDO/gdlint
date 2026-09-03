@@ -1,4 +1,4 @@
-package rules
+package core
 
 import (
 	sitter "github.com/tree-sitter/go-tree-sitter"
