@@ -15,8 +15,18 @@ func TestVariableWhitespaces(t *testing.T) {
 		expected []core.Warning
 	}{
 		{
-			name:     "correct",
+			name:     "correct with explicit type",
 			input:    "var b: int = 5",
+			expected: []core.Warning{},
+		},
+		{
+			name:     "correct with inferred type",
+			input:    "var b := 5",
+			expected: []core.Warning{},
+		},
+		{
+			name:     "correct without type",
+			input:    "var b = 5",
 			expected: []core.Warning{},
 		},
 		{
