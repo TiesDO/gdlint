@@ -11,9 +11,8 @@ type Warning struct {
 	StartChar int
 	EndLine   int
 	EndChar   int
-
-	Message string
-	Offense string
+	Message   string
+	Offense   string
 }
 
 func NewWarningFromNode(node sitter.Node, message string, offense string) *Warning {
@@ -22,9 +21,8 @@ func NewWarningFromNode(node sitter.Node, message string, offense string) *Warni
 		StartChar: int(node.StartPosition().Column),
 		EndLine:   int(node.EndPosition().Row),
 		EndChar:   int(node.EndPosition().Column),
-
-		Message: message,
-		Offense: offense,
+		Message:   message,
+		Offense:   offense,
 	}
 }
 

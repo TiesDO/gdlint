@@ -10,14 +10,14 @@ import (
 var UntypedVariableStatementRule = core.MatchRule{
 	Name:    "untyped_variable_statement",
 	Pattern: []byte("(variable_statement !type name: (name) @untyped_var)"),
-	Execute: func(match *sitter.QueryMatch, _ *sitter.Query, source []byte) ([]core.Warning, error) {
+	Execute: func(match *sitter.QueryMatch, _ *sitter.Query, document *core.Document) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
 
 		capture := match.Captures[0]
 		node := capture.Node
-		content := string(source[node.StartByte():node.EndByte()])
+		content := document.ContentForNode(&node)
 
 		message := fmt.Sprintf("variable %s is untyped", content)
 		offense := "untyped_variable_statement"

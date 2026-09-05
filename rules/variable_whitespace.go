@@ -2,6 +2,7 @@ package rules
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/TiesDO/gdlint/core"
 	sitter "github.com/tree-sitter/go-tree-sitter"
@@ -10,72 +11,122 @@ import (
 var VariableWhitespaceRule = core.MatchRule{
 	Name:    "variable_whitespace",
 	Pattern: variableWhitespaceQuery,
-	Execute: func(match *sitter.QueryMatch, query *sitter.Query, source []byte) ([]core.Warning, error) {
-		if len(match.Captures) < 2 {
-			return nil, errors.New("expected at least 2 captures")
+	Execute: func(match *sitter.QueryMatch, query *sitter.Query, document *core.Document) ([]core.Warning, error) {
+		if len(match.Captures) < 1 {
+			return nil, errors.New("expected at least 1 capture")
 		}
 
-		definingName := query.CaptureNames()[match.Captures[1].Index]
+		captureNames := query.CaptureNames()
+		var lastEndByte uint = 0
+		warnings := []core.Warning{}
 
-		switch definingName {
-		case "var.assign":
-			name := match.Captures[0]
-			assign := match.Captures[1]
-			value := match.Captures[2]
+		for _, capture := range match.Captures {
+			captureName := captureNames[capture.Index]
+			switch captureName {
+			case "var.var":
+				lastEndByte = capture.Node.EndByte()
+			case "var.name":
+				startByte := capture.Node.StartByte()
+				difference := startByte - lastEndByte
 
-			_, e1 := name.Node.ByteRange()
-			s2, e2 := assign.Node.ByteRange()
-			s3, _ := value.Node.ByteRange()
+				if difference > 1 {
+					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
+				} // else is a never occuring branch
 
-			nameToAssignDistance := s2 - e1
-			assignToValueDistance := s3 - e2
+				lastEndByte = capture.Node.EndByte()
+			case "var.colon":
+				startByte := capture.Node.StartByte()
+				difference := startByte - lastEndByte
 
-			if nameToAssignDistance == 1 && assignToValueDistance == 1 {
-				return nil, nil
+				if difference > 0 {
+					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte, startByte-1, document))
+				}
+
+				lastEndByte = capture.Node.EndByte()
+			case "var.type":
+				startByte := capture.Node.StartByte()
+				difference := startByte - lastEndByte
+
+				if difference > 1 {
+					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
+				} else if difference == 0 {
+					previous := capture.Node.PrevSibling()
+					warnings = append(warnings, newNoWhitespaceWarning(1, previous.StartByte(), previous.EndByte(), document))
+				}
+
+				lastEndByte = capture.Node.EndByte()
+			case "var.assign":
+				startByte := capture.Node.StartByte()
+				difference := startByte - lastEndByte
+
+				if difference > 1 {
+					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
+				} else if difference == 0 {
+					warnings = append(warnings, newNoWhitespaceWarning(0, startByte, capture.Node.EndByte(), document))
+				}
+
+				lastEndByte = capture.Node.EndByte()
+			case "var.infer":
+				startByte := capture.Node.StartByte()
+				difference := startByte - lastEndByte
+
+				if difference > 1 {
+					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
+				} else if difference == 0 {
+					warnings = append(warnings, newNoWhitespaceWarning(0, startByte, capture.Node.EndByte(), document))
+				}
+
+				lastEndByte = capture.Node.EndByte()
+			case "var.value":
+				startByte := capture.Node.StartByte()
+				difference := startByte - lastEndByte
+
+				if difference > 1 {
+					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
+				} else if difference == 0 {
+					previous := capture.Node.PrevSibling()
+					warnings = append(warnings, newNoWhitespaceWarning(0, previous.StartByte(), previous.EndByte(), document))
+				}
+
+				lastEndByte = capture.Node.EndByte()
 			}
-
-			if nameToAssignDistance != 1 && assignToValueDistance != 1 {
-				return []core.Warning{
-					{
-						StartLine: int(name.Node.StartPosition().Row),
-						StartChar: int(name.Node.EndPosition().Column),
-						EndLine:   int(value.Node.StartPosition().Row),
-						EndChar:   int(value.Node.StartPosition().Column),
-						Message:   "'=' should have exactly 1 whitespace left and right",
-						Offense:   "variable_whitespace",
-					},
-				}, nil
-			} else if nameToAssignDistance != 1 {
-				return []core.Warning{
-					{
-						StartLine: int(name.Node.StartPosition().Row),
-						StartChar: int(name.Node.EndPosition().Column),
-						EndLine:   int(assign.Node.StartPosition().Row),
-						EndChar:   int(assign.Node.StartPosition().Column),
-						Message:   "'=' should have exactly 1 whitespace left and right",
-						Offense:   "variable_whitespace",
-					},
-				}, nil
-			} else {
-				return []core.Warning{
-					{
-						StartLine: int(assign.Node.StartPosition().Row),
-						StartChar: int(assign.Node.EndPosition().Column),
-						EndLine:   int(value.Node.StartPosition().Row),
-						EndChar:   int(value.Node.StartPosition().Column),
-						Message:   "'=' should have exactly 1 whitespace left and right",
-						Offense:   "variable_whitespace",
-					},
-				}, nil
-			}
-		case "var.colon":
-			// handle the explicit typed case
-			return nil, errors.New("colon not yet implemented")
-		case "var.inferred":
-			// handle inferred case
-			return nil, errors.New("inferred not yet implemented")
 		}
 
-		return nil, nil
+		warnings = slices.Compact(warnings)
+
+		return warnings, nil
 	},
+}
+
+func newExtraWhitespaceWarning(startByte, endByte uint, document *core.Document) core.Warning {
+	startPos := document.ByteToPoint(startByte)
+	endPos := document.ByteToPoint(endByte)
+
+	return core.Warning{
+		StartLine: int(startPos.Row),
+		StartChar: int(startPos.Column),
+		EndLine:   int(endPos.Row),
+		EndChar:   int(endPos.Column),
+		Message:   "should remove redundant whitespace",
+		Offense:   "extra_whitespace",
+	}
+}
+
+func newNoWhitespaceWarning(direction int, startByte, endByte uint, document *core.Document) core.Warning {
+	startPos := document.ByteToPoint(startByte)
+	endPos := document.ByteToPoint(endByte)
+
+	messages := []string{
+		"should have 1 whitespace character either side",
+		"should have 1 whitespace character after",
+	}
+
+	return core.Warning{
+		StartLine: int(startPos.Row),
+		StartChar: int(startPos.Column),
+		EndLine:   int(endPos.Row),
+		EndChar:   int(endPos.Column),
+		Message:   messages[direction],
+		Offense:   "no_whitespace",
+	}
 }

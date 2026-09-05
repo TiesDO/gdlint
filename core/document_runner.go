@@ -68,11 +68,11 @@ func (r *DocumentRunner) CheckDocument(doc *Document) ([]Warning, error) {
 	return warnings, nil
 }
 
-func (r *DocumentRunner) runNodeRules(doc *Document) ([]Warning, error) {
+func (r *DocumentRunner) runNodeRules(document *Document) ([]Warning, error) {
 	warnings := []Warning{}
 
 	for _, rule := range r.nodeRules {
-		foundWarnings, err := rule.Execute(doc.parser.tree.RootNode(), doc.source)
+		foundWarnings, err := rule.Execute(document.parser.tree.RootNode(), document)
 
 		if err != nil {
 			return nil, err
@@ -84,14 +84,14 @@ func (r *DocumentRunner) runNodeRules(doc *Document) ([]Warning, error) {
 	return warnings, nil
 }
 
-func (r *DocumentRunner) runMatchRules(doc *Document) ([]Warning, error) {
+func (r *DocumentRunner) runMatchRules(document *Document) ([]Warning, error) {
 	pattern, err := r.buildMatchRulePattern()
 
 	if err != nil {
 		return nil, err
 	}
 
-	matches, query, err := doc.Query(pattern)
+	matches, query, err := document.Query(pattern)
 
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (r *DocumentRunner) runMatchRules(doc *Document) ([]Warning, error) {
 
 		rule := r.matchRules[match.PatternIndex]
 
-		foundWarnings, err := rule.Execute(match, query, doc.source)
+		foundWarnings, err := rule.Execute(match, query, document)
 
 		if err != nil {
 			return nil, err
