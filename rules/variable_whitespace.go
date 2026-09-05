@@ -22,74 +22,51 @@ var VariableWhitespaceRule = core.MatchRule{
 
 		for _, capture := range match.Captures {
 			captureName := captureNames[capture.Index]
-			switch captureName {
-			case "var.var":
-				lastEndByte = capture.Node.EndByte()
-			case "var.name":
-				startByte := capture.Node.StartByte()
-				difference := startByte - lastEndByte
 
+			if captureName == "var.var" {
+				lastEndByte = capture.Node.EndByte()
+				continue
+			}
+
+			startByte := capture.Node.StartByte()
+			difference := startByte - lastEndByte
+
+			switch captureName {
+			case "var.name":
 				if difference > 1 {
 					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
-				} // else is a never occuring branch
-
-				lastEndByte = capture.Node.EndByte()
+				}
+				// else is a never occuring branch
 			case "var.colon":
-				startByte := capture.Node.StartByte()
-				difference := startByte - lastEndByte
-
 				if difference > 0 {
 					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte, startByte-1, document))
 				}
-
-				lastEndByte = capture.Node.EndByte()
-			case "var.type":
-				startByte := capture.Node.StartByte()
-				difference := startByte - lastEndByte
-
-				if difference > 1 {
-					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
-				} else if difference == 0 {
-					previous := capture.Node.PrevSibling()
-					warnings = append(warnings, newNoWhitespaceWarning(1, previous.StartByte(), previous.EndByte(), document))
-				}
-
-				lastEndByte = capture.Node.EndByte()
 			case "var.assign":
-				startByte := capture.Node.StartByte()
-				difference := startByte - lastEndByte
-
-				if difference > 1 {
-					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
-				} else if difference == 0 {
-					warnings = append(warnings, newNoWhitespaceWarning(0, startByte, capture.Node.EndByte(), document))
-				}
-
-				lastEndByte = capture.Node.EndByte()
+				fallthrough
 			case "var.infer":
-				startByte := capture.Node.StartByte()
-				difference := startByte - lastEndByte
-
 				if difference > 1 {
 					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
 				} else if difference == 0 {
 					warnings = append(warnings, newNoWhitespaceWarning(0, startByte, capture.Node.EndByte(), document))
 				}
-
-				lastEndByte = capture.Node.EndByte()
+			case "var.type":
+				fallthrough
 			case "var.value":
-				startByte := capture.Node.StartByte()
-				difference := startByte - lastEndByte
-
 				if difference > 1 {
 					warnings = append(warnings, newExtraWhitespaceWarning(lastEndByte+1, startByte-1, document))
 				} else if difference == 0 {
 					previous := capture.Node.PrevSibling()
-					warnings = append(warnings, newNoWhitespaceWarning(0, previous.StartByte(), previous.EndByte(), document))
-				}
 
-				lastEndByte = capture.Node.EndByte()
+					messageId := 0
+					if captureName == "var.type" {
+						messageId = 1
+					}
+
+					warnings = append(warnings, newNoWhitespaceWarning(messageId, previous.StartByte(), previous.EndByte(), document))
+				}
 			}
+
+			lastEndByte = capture.Node.EndByte()
 		}
 
 		warnings = slices.Compact(warnings)
