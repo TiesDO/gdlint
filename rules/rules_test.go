@@ -35,6 +35,17 @@ func loadFixture(name string) ([]byte, error) {
 	return data, nil
 }
 
+func NewDocumentFromString(t *testing.T, fileName string, content string) *core.Document {
+	document := core.NewDocument(uri.URI(fmt.Sprintf("file:///%s", fileName)))
+	err := document.UpdateSource(context.Background(), []byte(content))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return document
+}
+
 func NewDocumentFromFixture(t *testing.T, fixtureName string) *core.Document {
 	source, err := loadFixture(fixtureName)
 
