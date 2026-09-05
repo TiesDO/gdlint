@@ -68,7 +68,7 @@ TODO
   - [ ] enums + members
 - [ ] ordering (top level)
 - [ ] whitespace
-  - [ ] variable assignments
+  - [x] variable assignments
   - [ ] conditions
   - [ ] math operations
 - [ ] formatting
