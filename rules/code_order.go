@@ -21,7 +21,7 @@ var pluralMap map[string]string = map[string]string{
 
 var CodeOrderRule = core.NodeRule{
 	Name: "code_order",
-	Execute: func(node *sitter.Node, source []byte) ([]core.Warning, error) {
+	Execute: func(node *sitter.Node, document *core.Document) ([]core.Warning, error) {
 		currentPhase := 1
 		previousNodeName := "annotation"
 
@@ -66,5 +66,3 @@ var CodeOrderRule = core.NodeRule{
 		return warnings, nil
 	},
 }
-
-

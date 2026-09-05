@@ -43,3 +43,28 @@ func (d *Document) UpdateSource(ctx context.Context, source []byte) error {
 func (d *Document) Query(pattern string) (*sitter.QueryMatches, *sitter.Query, error) {
 	return d.parser.Query(pattern, d.source)
 }
+
+func (d *Document) ContentForNode(node *sitter.Node) string {
+	return string(d.source[node.StartByte():node.EndByte()])
+}
+
+func (d *Document) ByteToPoint(byteOffset uint) sitter.Point {
+	if int(byteOffset) >= len(d.source) {
+		byteOffset = uint(len(d.source))
+	}
+
+	var row uint = 0
+	var rowStartByte uint = 0
+
+	for i := uint(0); i < byteOffset; i++ {
+		if d.source[i] == '\n' {
+			row++
+			rowStartByte = i + 1
+		}
+	}
+
+	return sitter.Point{
+		Row:    row,
+		Column: byteOffset - rowStartByte,
+	}
+}

@@ -11,14 +11,14 @@ import (
 var ClassNameCaseRule = core.MatchRule{
 	Name:    "class_name_case",
 	Pattern: []byte("[(class_name_statement name: (name) @class_name) (class_definition name: (name) @class_definition)]"),
-	Execute: func(match *sitter.QueryMatch, _ *sitter.Query, source []byte) ([]core.Warning, error) {
+	Execute: func(match *sitter.QueryMatch, _ *sitter.Query, document *core.Document) ([]core.Warning, error) {
 		if len(match.Captures) != 1 {
 			return nil, fmt.Errorf("expected only 1 capture, got %d", len(match.Captures))
 		}
 
 		capture := match.Captures[0]
 		node := capture.Node
-		content := string(source[node.StartByte():node.EndByte()])
+		content := document.ContentForNode(&node)
 
 		message := fmt.Sprintf("class name '%s' must be PascalCase", content)
 		offense := "class_name_case"
