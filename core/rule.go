@@ -10,7 +10,7 @@ type Rule interface {
 
 type MatchRule struct {
 	Name    string
-	Execute func(match *sitter.QueryMatch, query *sitter.Query, source []byte) ([]Warning, error)
+	Execute func(match *sitter.QueryMatch, query *sitter.Query, document *Document) ([]Warning, error)
 	Pattern []byte
 }
 
@@ -20,7 +20,7 @@ func (r *MatchRule) Identifier() string {
 
 type NodeRule struct {
 	Name    string
-	Execute func(*sitter.Node, []byte) ([]Warning, error)
+	Execute func(node *sitter.Node, document *Document) ([]Warning, error)
 }
 
 func (r *NodeRule) Identifier() string {
