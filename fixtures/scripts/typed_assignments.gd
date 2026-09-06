@@ -16,3 +16,10 @@ func bar(n: int) -> void:
 
 func bazz(m):
 	pass
+
+
+signal validSignal
+signal alsoValidSignal(a: int, b: String)
+
+signal invalidSignal(a, b)
+signal alsoInvalidSignal(a: int, b)
