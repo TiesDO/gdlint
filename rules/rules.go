@@ -9,7 +9,7 @@ func RegisterAll(r *core.RuleRegistry) {
 	r.MustRegisterMatchRule(&UntypedFunctionArgumentRule)
 	r.MustRegisterMatchRule(&UntypedFunctionReturnRule)
 	r.MustRegisterMatchRule(&UntypedVariableStatementRule)
-	r.MustRegisterMatchRule(&VariableWhitespaceRule)
+	r.MustRegisterMatchRule(&UntypedSignalArgumentRule)
 
 	r.MustRegisterNodeRule(&CodeOrderRule)
 }
