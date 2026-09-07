@@ -25,7 +25,7 @@ var ClassNameCaseRule = core.MatchRule{
 
 		if !util.IsPascalCase(content) {
 			return []core.Warning{
-				*core.NewWarningFromNode(node, message, offense),
+				core.NewWarningFromNode(node, message, offense),
 			}, nil
 		} else {
 			return nil, nil

@@ -25,7 +25,7 @@ var ConstNameCaseRule = core.MatchRule{
 
 		if !util.IsConstCase(content) {
 			return []core.Warning{
-				*core.NewWarningFromNode(node, message, offense),
+				core.NewWarningFromNode(node, message, offense),
 			}, nil
 		} else {
 			return nil, nil

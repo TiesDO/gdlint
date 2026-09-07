@@ -23,7 +23,7 @@ var UntypedVariableStatementRule = core.MatchRule{
 		offense := "untyped_variable_statement"
 
 		warnings := make([]core.Warning, 1)
-		warnings[0] = *core.NewWarningFromNode(node, message, offense)
+		warnings[0] = core.NewWarningFromNode(node, message, offense)
 
 		return warnings, nil
 	},

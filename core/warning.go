@@ -15,8 +15,8 @@ type Warning struct {
 	Offense   string
 }
 
-func NewWarningFromNode(node sitter.Node, message string, offense string) *Warning {
-	return &Warning{
+func NewWarningFromNode(node sitter.Node, message string, offense string) Warning {
+	return Warning{
 		StartLine: int(node.StartPosition().Row),
 		StartChar: int(node.StartPosition().Column),
 		EndLine:   int(node.EndPosition().Row),

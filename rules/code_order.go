@@ -53,7 +53,7 @@ var CodeOrderRule = core.NodeRule{
 				message := fmt.Sprintf("%s should be defined before %s", nodePlural, prevPlural)
 				offense := "code_order"
 
-				warnings = append(warnings, *core.NewWarningFromNode(*child, message, offense))
+				warnings = append(warnings, core.NewWarningFromNode(*child, message, offense))
 
 				currentPhase = phase
 				previousNodeName = nodeType
