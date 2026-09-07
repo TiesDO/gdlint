@@ -117,8 +117,16 @@ func NewStandardConfigFromRaw(raw *RawConfig) (*StandardConfig, error) {
 }
 
 func (c *StandardConfig) ShouldCheckFile(fileName string) bool {
-	for _, pattern := range c.includedFilePatterns {
-		if !pattern.Match(fileName) {
+	if len(c.includedFilePatterns) > 0 {
+		matched := false
+		for _, pattern := range c.includedFilePatterns {
+			if pattern.Match(fileName) {
+				matched = true
+				break
+			}
+		}
+
+		if !matched {
 			return false
 		}
 	}
