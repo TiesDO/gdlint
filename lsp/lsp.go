@@ -38,7 +38,7 @@ func NewServer(stream_in *os.File, stream_out *os.File, logger *log.Logger) Serv
 	server := Server{
 		logger:    logger,
 		documents: map[uri.URI]*core.Document{},
-		runner:    core.NewDocumentRunner(&core.DefaultRuleRegistry),
+		runner:    core.NewDocumentRunner(&core.DefaultRunnerConfig{}),
 	}
 
 	server.stream = jrpc.NewStream(stdio{

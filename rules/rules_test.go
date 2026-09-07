@@ -35,6 +35,22 @@ func loadFixture(name string) ([]byte, error) {
 	return data, nil
 }
 
+type TestRunnerConfig struct {
+	rule core.Rule
+}
+
+func (c *TestRunnerConfig) ShouldCheckFile(fileName string) bool {
+	return true
+}
+
+func (c *TestRunnerConfig) ShouldCheckRule(ruleName string) bool {
+	return c.rule.Identifier() == ruleName
+}
+
+func (c *TestRunnerConfig) GetEnabledRules() []core.Rule {
+	return []core.Rule{c.rule}
+}
+
 func NewDocumentFromString(t *testing.T, fileName string, content string) *core.Document {
 	document := core.NewDocument(uri.URI(fmt.Sprintf("file:///%s", fileName)))
 	err := document.UpdateSource(context.Background(), []byte(content))
@@ -64,7 +80,11 @@ func NewDocumentFromFixture(t *testing.T, fixtureName string) *core.Document {
 }
 
 func NewRunnerWithRule(t *testing.T, rule core.Rule) *core.DocumentRunner {
-	runner := core.NewDocumentRunner(&core.DefaultRuleRegistry)
+	cfg := TestRunnerConfig{
+		rule: rule,
+	}
+
+	runner := core.NewDocumentRunner(&cfg)
 	err := runner.SetRules([]string{rule.Identifier()})
 
 	if err != nil {

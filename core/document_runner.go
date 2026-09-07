@@ -7,15 +7,15 @@ import (
 )
 
 type DocumentRunner struct {
-	registry   *RuleRegistry
+	config     RunnerConfig
 	nodeRules  []*NodeRule
 	matchRules []*MatchRule
 	logger     log.Logger
 }
 
-func NewDocumentRunner(registry *RuleRegistry) *DocumentRunner {
+func NewDocumentRunner(config RunnerConfig) *DocumentRunner {
 	runner := DocumentRunner{
-		registry:   registry,
+		config:     config,
 		nodeRules:  []*NodeRule{},
 		matchRules: []*MatchRule{},
 	}
@@ -27,19 +27,13 @@ func (r *DocumentRunner) SetRules(rules []string) error {
 	r.nodeRules = make([]*NodeRule, 0)
 	r.matchRules = make([]*MatchRule, 0)
 
-	for _, ruleName := range rules {
-		rule := r.registry.GetByName(ruleName)
-
-		if rule == nil {
-			return fmt.Errorf("failed to find rule '%s'", ruleName)
-		}
-
+	for _, rule := range r.config.GetEnabledRules() {
 		if nodeRule, ok := rule.(*NodeRule); ok {
 			r.nodeRules = append(r.nodeRules, nodeRule)
 		} else if matchRule, ok := rule.(*MatchRule); ok {
 			r.matchRules = append(r.matchRules, matchRule)
 		} else {
-			return fmt.Errorf("rule '%s' is of an unsupported type", ruleName)
+			return fmt.Errorf("rule '%s' is of an unsupported type", rule.Identifier())
 		}
 	}
 
