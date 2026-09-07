@@ -74,3 +74,17 @@ func (r *RuleRegistry) RuleNames() []string {
 
 	return names
 }
+
+func (r *RuleRegistry) GetRules() []Rule {
+	rules := []Rule{}
+
+	for _, rule := range r.match_rules {
+		rules = append(rules, rule)
+	}
+
+	for _, rule := range r.node_rules {
+		rules = append(rules, rule)
+	}
+
+	return rules
+}
