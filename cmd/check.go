@@ -43,7 +43,7 @@ var checkCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		runner := core.NewDocumentRunner(&core.DefaultRunnerConfig{})
+		runner := core.NewDocumentRunner(core.NewAllRuleRunnerConfig())
 
 		included_rules, err := cmd.Flags().GetStringSlice("include")
 

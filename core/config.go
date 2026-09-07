@@ -7,16 +7,24 @@ type RunnerConfig interface {
 	GetEnabledRules() []Rule
 }
 
-type DefaultRunnerConfig struct{}
-
-func (c *DefaultRunnerConfig) ShouldCheckFile(_ string) bool {
-	return true
+type AllRuleRunnerConfig struct {
+	rules []Rule
 }
 
-func (c *DefaultRunnerConfig) ShouldCheckRule(_ string) bool {
-	return true
+func NewAllRuleRunnerConfig() *AllRuleRunnerConfig {
+	return &AllRuleRunnerConfig{rules: DefaultRuleRegistry.GetRules()}
 }
 
-func (c *DefaultRunnerConfig) GetEnabledRules() []Rule {
-	return DefaultRuleRegistry.GetRules()
+func (c *AllRuleRunnerConfig) ShouldCheckFile(fileName string) bool {
+	return strings.HasSuffix(fileName, ".gd")
+}
+
+func (c *AllRuleRunnerConfig) ShouldCheckRule(ruleName string) bool {
+	return slices.ContainsFunc(c.rules, func(rule Rule) bool {
+		return rule.Identifier() == ruleName
+	})
+}
+
+func (c *AllRuleRunnerConfig) GetEnabledRules() []Rule {
+	return c.rules
 }
