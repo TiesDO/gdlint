@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -38,4 +39,18 @@ func FindFileUpwards(fileName string, startingDir string) (string, error) {
 
 		currentDir = parentDir
 	}
+}
+
+func UnmarshalJSONFile(filePath string, object any) error {
+	data, err := os.ReadFile(filePath)
+
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", filePath, err)
+	}
+
+	if err := json.Unmarshal(data, object); err != nil {
+		return fmt.Errorf("failed to unmarshal json from %s: %w", filePath, err)
+	}
+
+	return nil
 }
